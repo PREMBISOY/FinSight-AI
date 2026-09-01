@@ -2,7 +2,20 @@ import { TrendingUp, Menu } from 'lucide-react'
 import { isMockMode } from '../../services/api'
 import { MockModeBanner } from '../shared/DegradedWarning'
 
-export function Header() {
+export type AppView = 'research' | 'portfolio' | 'guide'
+
+interface HeaderProps {
+  activeView: AppView
+  onNavigate: (view: AppView) => void
+}
+
+const navigationItems: Array<{ label: string; view: AppView }> = [
+  { label: 'Research', view: 'research' },
+  { label: 'Portfolio view', view: 'portfolio' },
+  { label: 'How it works', view: 'guide' },
+]
+
+export function Header({ activeView, onNavigate }: HeaderProps) {
   return (
     <header className="border-b border-[#eeeeee] bg-white sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-5 sm:px-6 h-16 flex items-center justify-between gap-4">
@@ -17,17 +30,31 @@ export function Header() {
         </div>
 
         {/* Center: pipeline legend */}
-        <nav className="hidden md:flex items-center gap-8 text-sm text-slate-500">
-          <span className="text-brand-500">Research</span>
-          <span>Portfolio view</span>
-          <span>How it works</span>
+        <nav aria-label="Primary navigation" className="hidden md:flex items-center gap-1">
+          {navigationItems.map(item => (
+            <button
+              key={item.view}
+              type="button"
+              onClick={() => onNavigate(item.view)}
+              className={`px-4 py-2 text-sm border-b-2 transition-colors ${
+                activeView === item.view
+                  ? 'border-brand-500 text-brand-500'
+                  : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-200'
+              }`}
+              aria-current={activeView === item.view ? 'page' : undefined}
+            >
+              {item.label}
+            </button>
+          ))}
         </nav>
 
         {/* Right: status */}
         <div className="flex items-center gap-3">
           <MockModeBanner visible={isMockMode} />
           <div className="hidden sm:block text-xs text-slate-500">Market intelligence</div>
-          <Menu className="w-5 h-5 text-slate-600" />
+          <button type="button" className="md:hidden p-1 text-slate-600" aria-label="Open navigation">
+            <Menu className="w-5 h-5" />
+          </button>
         </div>
       </div>
     </header>
