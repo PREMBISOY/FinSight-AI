@@ -27,7 +27,8 @@ async def test_end_to_end_normal_and_personalization(orchestrator: AnalysisOrche
     assert conservative.intelligence.recommendation == Recommendation.HOLD
     assert aggressive.intelligence.recommendation == Recommendation.CONSIDER_ENTRY
     assert len(conservative.agent_results) == 3
-    assert len(conservative.decision_trace) == 6
+    assert len(conservative.decision_trace) == 7
+    assert conservative.decision_trace[-1].stage == "gemini"
     assert {metric.name for metric in conservative.metrics} >= {
         "technical_agent_latency",
         "fundamental_agent_latency",
@@ -122,6 +123,7 @@ async def test_agent_exception_isolated_from_pipeline() -> None:
 
     service = AnalysisOrchestrator(
         repository=InMemoryRepository(),
+        data_service=FixtureDataService(),
         agents=AgentSuite(technical=technical, fundamental=fundamental, sentiment=broken),
     )
     result = await service.run_analysis(
@@ -156,6 +158,7 @@ async def test_malformed_agent_output_becomes_safe_error_result() -> None:
 
     service = AnalysisOrchestrator(
         repository=InMemoryRepository(),
+        data_service=FixtureDataService(),
         agents=AgentSuite(technical=malformed, fundamental=fundamental, sentiment=sentiment),
     )
     result = await service.run_analysis(
@@ -202,6 +205,7 @@ async def test_agent_timeout_isolated_from_pipeline() -> None:
 
     service = AnalysisOrchestrator(
         repository=InMemoryRepository(),
+        data_service=FixtureDataService(),
         agents=AgentSuite(technical=technical, fundamental=fundamental, sentiment=slow),
         agent_timeout_seconds=0.01,
     )
@@ -238,6 +242,7 @@ async def test_all_agents_unavailable_produces_insufficient_data_response() -> N
 
     service = AnalysisOrchestrator(
         repository=InMemoryRepository(),
+        data_service=FixtureDataService(),
         agents=AgentSuite(technical=technical, fundamental=fundamental, sentiment=sentiment),
     )
     result = await service.run_analysis(
@@ -247,4 +252,5 @@ async def test_all_agents_unavailable_produces_insufficient_data_response() -> N
     assert result.synthesis.confidence == 0
     assert result.synthesis.data_completeness == 0
     assert result.intelligence.recommendation == Recommendation.INSUFFICIENT_EVIDENCE
-    assert result.decision_trace[-1].stage == "personalization"
+    assert any(step.stage == "personalization" for step in result.decision_trace)
+    assert result.decision_trace[-1].stage == "gemini"

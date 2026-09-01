@@ -26,7 +26,8 @@ from backend.app.schemas import (
     MarketData,
     NewsItem,
 )
-from backend.app.services.data import DataNotFoundError, FixtureDataService
+from backend.app.services.data import DataNotFoundError, DataService, build_data_service
+from backend.app.services.gemini import InsightGenerator, build_insight_generator
 from backend.app.synthesis import synthesize
 
 
@@ -48,13 +49,15 @@ class AnalysisOrchestrator:
     def __init__(
         self,
         repository: Repository,
-        data_service: FixtureDataService | None = None,
+        data_service: DataService | None = None,
         agents: AgentSuite | None = None,
+        insight_generator: InsightGenerator | None = None,
         agent_timeout_seconds: float = 5.0,
     ) -> None:
         self.repository = repository
-        self.data_service = data_service or FixtureDataService()
+        self.data_service = data_service or build_data_service()
         self.agents = agents or AgentSuite()
+        self.insight_generator = insight_generator or build_insight_generator()
         self.agent_timeout_seconds = agent_timeout_seconds
 
     @staticmethod
@@ -104,6 +107,10 @@ class AnalysisOrchestrator:
             if isinstance(raw_market, DataNotFoundError):
                 raise raw_market
             raise DataNotFoundError(f"Market data unavailable for {request.symbol}") from raw_market
+        if raw_market.symbol.upper() != request.symbol:
+            raise DataNotFoundError(
+                f"Market dataset symbol mismatch for {request.symbol}; received {raw_market.symbol}."
+            )
 
         input_warnings: list[str] = []
         news_items: list[NewsItem]
@@ -112,12 +119,28 @@ class AnalysisOrchestrator:
             news_items = []
             input_warnings.append("News input could not be loaded; sentiment may be unavailable.")
         else:
-            news_items = raw_news
+            news_items = [item for item in raw_news if item.symbol.upper() == request.symbol]
+            if len(news_items) != len(raw_news):
+                input_warnings.append("News items for other symbols were excluded from analysis.")
+            if any(item.synthetic for item in news_items):
+                input_warnings.append("News uses a labeled synthetic fallback because live items were unavailable.")
+            elif any(item.source_name.endswith("(stale cache)") for item in news_items):
+                input_warnings.append("News uses an expired cached snapshot because the live provider was unavailable.")
         if isinstance(raw_documents, Exception):
             documents = []
             input_warnings.append("Financial documents could not be loaded; fundamental analysis may be unavailable.")
         else:
-            documents = raw_documents
+            documents = [item for item in raw_documents if item.symbol.upper() == request.symbol]
+            if len(documents) != len(raw_documents):
+                input_warnings.append("Document chunks for other symbols were excluded from analysis.")
+            if any(item.synthetic for item in documents):
+                input_warnings.append(
+                    "Financial statements use a labeled synthetic fallback because live statements were unavailable."
+                )
+            elif any(item.source_name.endswith("(stale cache)") for item in documents):
+                input_warnings.append(
+                    "Financial statements use an expired cached snapshot because the live provider was unavailable."
+                )
 
         context = AnalysisContext(
             user_id=request.user_id,
@@ -136,6 +159,16 @@ class AnalysisOrchestrator:
 
         synthesis = synthesize(list(agent_results))
         intelligence = personalize(synthesis, profile, portfolio, request.symbol)
+        ai_insight = await self.insight_generator.generate(
+            symbol=request.symbol,
+            query=request.query,
+            market_data=raw_market,
+            profile=profile,
+            portfolio=portfolio,
+            agent_results=list(agent_results),
+            synthesis=synthesis,
+            intelligence=intelligence,
+        )
         total_latency_ms = (perf_counter() - pipeline_started) * 1000
         metrics = [
             *[
@@ -147,6 +180,7 @@ class AnalysisOrchestrator:
                 for result in agent_results
             ],
             AnalysisMetric(name="total_pipeline_latency", value=round(total_latency_ms, 3), unit="ms"),
+            AnalysisMetric(name="gemini_latency", value=ai_insight.latency_ms, unit="ms"),
             AnalysisMetric(name="signal_agreement", value=synthesis.agreement_score, unit="ratio"),
             AnalysisMetric(name="data_completeness", value=synthesis.data_completeness, unit="ratio"),
             AnalysisMetric(
@@ -164,6 +198,14 @@ class AnalysisOrchestrator:
             warnings.append("Specialist signals conflict; final confidence was reduced.")
         if raw_market.synthetic:
             warnings.append("Market data is a labeled synthetic Sprint 1 fixture, not a live quote.")
+        elif raw_market.source.endswith(":stale_cache"):
+            warnings.append(
+                "The live market provider was unavailable; the most recent expired cached snapshot was used."
+            )
+        if ai_insight.status != "success":
+            warnings.append(ai_insight.limitation or "Gemini insight is unavailable.")
+        elif ai_insight.limitation:
+            warnings.append(ai_insight.limitation)
 
         decision_trace = [
             DecisionTraceStep(
@@ -213,11 +255,29 @@ class AnalysisOrchestrator:
                     "reasons": intelligence.reasons,
                 },
             ),
+            DecisionTraceStep(
+                stage="gemini",
+                title=f"Gemini research enrichment {ai_insight.status}",
+                summary=(
+                    ai_insight.summary
+                    if ai_insight.summary
+                    else (ai_insight.limitation or "No Gemini explanation was produced.")
+                ),
+                details={
+                    "provider": ai_insight.provider,
+                    "model": ai_insight.model,
+                    "grounded": ai_insight.grounded,
+                    "citation_count": len(ai_insight.citations),
+                    "latency_ms": ai_insight.latency_ms,
+                },
+            ),
         ]
 
         response = AnalysisResponse(
             analysis_id=str(uuid4()),
             symbol=request.symbol,
+            query=request.query,
+            scenario=request.scenario,
             market_data=raw_market,
             investor_profile=profile,
             portfolio=portfolio,
@@ -225,6 +285,7 @@ class AnalysisOrchestrator:
             agent_results=list(agent_results),
             synthesis=synthesis,
             intelligence=intelligence,
+            ai_insight=ai_insight,
             decision_trace=decision_trace,
             metrics=metrics,
             warnings=warnings,

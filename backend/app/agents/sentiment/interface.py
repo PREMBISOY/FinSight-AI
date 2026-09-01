@@ -69,7 +69,8 @@ async def run_sentiment_analysis(
         )
 
     # ── Core analysis (DEGRADED or SUCCESS) ───────────────────────────────
-    result = analyze_news_sentiment(news_items)
+    source_label = ", ".join(sorted({item.source_name for item in news_items}))
+    result = analyze_news_sentiment(news_items, source_label=source_label)
 
     evidence = [
         Evidence(

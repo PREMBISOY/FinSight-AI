@@ -8,15 +8,6 @@ interface IntelligenceCardProps {
   profile: InvestorProfile
 }
 
-const recommendationDescriptions: Record<string, string> = {
-  CONSIDER_ENTRY: 'Market signals are positive and portfolio has room for this position.',
-  WATCH: 'Signals are uncertain. Monitor and wait for clarity before acting.',
-  HOLD: 'Maintain current position. Market is positive but exposure is already high.',
-  REDUCE_EXPOSURE: 'Risk profile or overexposure suggests reducing current holdings.',
-  AVOID: 'Market signals are negative. Do not add exposure at this time.',
-  INSUFFICIENT_EVIDENCE: 'Not enough evidence for a reliable recommendation.',
-}
-
 export function IntelligenceCard({ intelligence, profile }: IntelligenceCardProps) {
   const exposureMax = profile.max_position_size
   const exposurePct = (intelligence.portfolio_exposure_percent / exposureMax) * 100
@@ -30,7 +21,7 @@ export function IntelligenceCard({ intelligence, profile }: IntelligenceCardProp
           <div className="space-y-2">
             <RecommendationBadge value={intelligence.recommendation} />
             <p className="text-xs text-slate-400 max-w-xs">
-              {recommendationDescriptions[intelligence.recommendation]}
+              {intelligence.reasons[0] ?? 'See the evidence and profile-specific reasoning below.'}
             </p>
           </div>
           <RiskBadge value={intelligence.risk_level} />

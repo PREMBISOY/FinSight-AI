@@ -23,12 +23,7 @@ import logging
 import math
 import re
 from collections import Counter
-from typing import TYPE_CHECKING
-
 from backend.app.schemas import DocumentChunk
-
-if TYPE_CHECKING:
-    pass
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +90,12 @@ class EmbeddingIndex:
 
         scores: "np.ndarray" = self._matrix @ q_vec  # cosine similarity, shape (n,)
         top_indices = np.argsort(scores)[::-1][:limit]
-        return [(self._chunks[i], float(scores[i])) for i in top_indices]
+        # Cosine similarity can be negative, while the shared Evidence schema
+        # deliberately exposes relevance on a normalized 0..1 scale.
+        return [
+            (self._chunks[i], max(0.0, min(1.0, float(scores[i]))))
+            for i in top_indices
+        ]
 
 
 # ---------------------------------------------------------------------------
@@ -143,9 +143,10 @@ class LexicalIndex:
 # Public retrieval function
 # ---------------------------------------------------------------------------
 
-# Per-symbol cache: symbol -> (index, chunk_list_id)
-# We invalidate the cache if the chunk list changes (different id() reference).
-_index_cache: dict[str, tuple[object, int]] = {}
+# Per-symbol cache: symbol -> (index, content fingerprint). Fixture/service
+# layers commonly create a fresh list on every request, so object identity
+# would rebuild the embedding index on every analysis.
+_index_cache: dict[str, tuple[object, tuple[tuple[str, str], ...]]] = {}
 
 
 def _build_index(chunks: list[DocumentChunk]) -> EmbeddingIndex | LexicalIndex:
@@ -170,12 +171,12 @@ def retrieve(
 
     symbol = chunks[0].symbol if chunks else "_"
     cache_key = symbol
-    cached_index, cached_ptr = _index_cache.get(cache_key, (None, -1))
+    fingerprint = tuple((chunk.chunk_id, chunk.text) for chunk in chunks)
+    cached_index, cached_fingerprint = _index_cache.get(cache_key, (None, ()))
 
-    # Rebuild when chunk list is a different object (new load) or cache is empty.
-    if cached_index is None or cached_ptr != id(chunks):
+    if cached_index is None or cached_fingerprint != fingerprint:
         cached_index = _build_index(chunks)
-        _index_cache[cache_key] = (cached_index, id(chunks))
+        _index_cache[cache_key] = (cached_index, fingerprint)
 
     return cached_index.search(query, limit)
 

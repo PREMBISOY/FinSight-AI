@@ -5,7 +5,7 @@
 1. Start FastAPI and the dashboard.
 2. Open `/health` and confirm `ok`.
 3. Keep the dashboard stock fixed on `RELIANCE`.
-4. Explain that fixtures and synthetic document excerpts are clearly labeled for a reliable five-hour Sprint 1 demo.
+4. Confirm the market card shows `yahoo_finance:<ticker>` and no `SYNTHETIC` badge. Explain that Supabase caches upstream snapshots and Gemini adds current Google-Search-grounded context with visible citations.
 
 ## Scenario 1 — normal pipeline
 
@@ -13,7 +13,7 @@ Select `conservative-demo`, choose `normal`, and analyze. Show the three agent s
 
 ## Scenario 2 — personalization
 
-Keep `RELIANCE` and `normal` unchanged. Switch only from `conservative-demo` to `aggressive-demo`. The market synthesis remains identical, but the recommendation changes because exposure, risk tolerance, and horizon differ. This is the central demonstration.
+Keep `RELIANCE` and `normal` unchanged. Switch only from `conservative-demo` to `aggressive-demo`. The market evidence correctly remains identical, while exposure, risk score, suitability reasons, and Gemini guidance change. A live low-confidence/conflicting market can legitimately yield the same cautious action for both profiles; set `DATA_MODE=fixture` only when a scripted demo requires the deterministic `HOLD` versus `CONSIDER_ENTRY` contrast.
 
 ## Scenario 3 — degraded sentiment
 
@@ -27,6 +27,7 @@ Select `conflict`. Show bullish technical, bearish fundamental, and neutral sent
 
 - Three specialist agents execute concurrently, not sequentially.
 - Evidence and data quality are visible.
-- Structured rules choose the decision; an LLM cannot invent it.
+- Structured rules choose the decision; Gemini explains it and adds cited current context but cannot override it.
 - The system reports actual latency and risk/completeness metrics, not fabricated accuracy.
-- Supabase persistence can be activated without changing business logic.
+- Supabase persistence uses a server-only secret/service-role key and protected tables.
+- Yahoo Finance supplies research-grade live inputs; stale-cache and fixture fallbacks are explicit rather than silently presented as live.

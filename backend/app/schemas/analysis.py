@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, HttpUrl, field_validator
 
 from .agent import AgentOutput
 from .enums import MarketOutlook, Recommendation, RiskLevel
@@ -63,15 +63,31 @@ class AnalysisContext(BaseModel):
 
 
 class AnalyzeRequest(BaseModel):
-    user_id: str = Field(min_length=1)
-    symbol: str = Field(min_length=1, max_length=20)
-    query: str = "What do the latest financial evidence and outlook imply?"
+    user_id: str = Field(min_length=1, max_length=100, pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+    symbol: str = Field(
+        min_length=1,
+        max_length=20,
+        pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]*$",
+    )
+    query: str = Field(
+        default="What do the latest financial evidence and outlook imply?",
+        min_length=1,
+        max_length=1000,
+    )
     scenario: DemoScenario = DemoScenario.NORMAL
 
     @field_validator("symbol")
     @classmethod
     def normalize_symbol(cls, value: str) -> str:
         return value.strip().upper()
+
+    @field_validator("user_id", "query")
+    @classmethod
+    def strip_text(cls, value: str) -> str:
+        stripped = value.strip()
+        if not stripped:
+            raise ValueError("value must not be blank")
+        return stripped
 
 
 class AgentContribution(BaseModel):
@@ -104,6 +120,24 @@ class PersonalizedIntelligence(BaseModel):
     disclaimer: str = "Prototype investment intelligence, not financial advice."
 
 
+class ResearchCitation(BaseModel):
+    title: str = Field(min_length=1, max_length=300)
+    url: HttpUrl
+
+
+class AIInsight(BaseModel):
+    status: str = Field(pattern="^(success|unavailable|error)$")
+    provider: str = "google"
+    model: str
+    grounded: bool = False
+    summary: str = ""
+    profile_specific_guidance: list[str] = Field(default_factory=list)
+    key_risks: list[str] = Field(default_factory=list)
+    citations: list[ResearchCitation] = Field(default_factory=list)
+    latency_ms: float = Field(default=0, ge=0)
+    limitation: str | None = None
+
+
 class AnalysisMetric(BaseModel):
     name: str
     value: float
@@ -122,6 +156,8 @@ class AnalysisResponse(BaseModel):
     analysis_id: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     symbol: str
+    query: str = "What do the latest financial evidence and outlook imply?"
+    scenario: DemoScenario = DemoScenario.NORMAL
     market_data: MarketData
     investor_profile: InvestorProfile
     portfolio: Portfolio
@@ -129,6 +165,13 @@ class AnalysisResponse(BaseModel):
     agent_results: list[AgentOutput]
     synthesis: SynthesisResult
     intelligence: PersonalizedIntelligence
+    ai_insight: AIInsight = Field(
+        default_factory=lambda: AIInsight(
+            status="unavailable",
+            model="unknown",
+            limitation="This stored analysis predates Gemini insight metadata.",
+        )
+    )
     decision_trace: list[DecisionTraceStep]
     metrics: list[AnalysisMetric]
     warnings: list[str] = Field(default_factory=list)

@@ -149,6 +149,24 @@ export interface PersonalizedIntelligence {
   disclaimer: string
 }
 
+export interface ResearchCitation {
+  title: string
+  url: string
+}
+
+export interface AIInsight {
+  status: 'success' | 'unavailable' | 'error'
+  provider: string
+  model: string
+  grounded: boolean
+  summary: string
+  profile_specific_guidance: string[]
+  key_risks: string[]
+  citations: ResearchCitation[]
+  latency_ms: number
+  limitation?: string | null
+}
+
 // ---- Metrics & Trace ----
 
 export interface AnalysisMetric {
@@ -171,6 +189,8 @@ export interface AnalysisResponse {
   analysis_id: string
   created_at: string
   symbol: string
+  query: string
+  scenario: DemoScenario
   market_data: MarketData
   investor_profile: InvestorProfile
   portfolio: Portfolio
@@ -178,6 +198,7 @@ export interface AnalysisResponse {
   agent_results: AgentOutput[]
   synthesis: SynthesisResult
   intelligence: PersonalizedIntelligence
+  ai_insight: AIInsight
   decision_trace: DecisionTraceStep[]
   metrics: AnalysisMetric[]
   warnings: string[]

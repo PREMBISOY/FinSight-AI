@@ -81,17 +81,17 @@ async def _context(scenario: DemoScenario = DemoScenario.NORMAL) -> AnalysisCont
     )
 
 
-# 30-day uptrend (clearly bullish)
-_BULLISH_CLOSES = [float(1000 + i * 15) for i in range(30)]
-_BULLISH_VOLUMES = [float(5_000_000 + i * 100_000) for i in range(30)]  # rising volume
+# 40-day uptrend (clearly bullish; long enough for MACD 12/26/9)
+_BULLISH_CLOSES = [float(1000 + i * 15) for i in range(40)]
+_BULLISH_VOLUMES = [float(5_000_000 + i * 100_000) for i in range(40)]  # rising volume
 
-# 30-day downtrend (clearly bearish)
-_BEARISH_CLOSES = [float(2000 - i * 15) for i in range(30)]
-_BEARISH_VOLUMES = [float(5_000_000)] * 29 + [float(7_000_000)]  # slight spike
+# 40-day downtrend (clearly bearish)
+_BEARISH_CLOSES = [float(2000 - i * 15) for i in range(40)]
+_BEARISH_VOLUMES = [float(5_000_000)] * 39 + [float(7_000_000)]  # slight spike
 
-# 30 days flat within ±0.5 % band (neutral)
-_NEUTRAL_CLOSES = [float(1500 + ((-1) ** i) * 3) for i in range(30)]
-_NEUTRAL_VOLUMES = [float(1_000_000)] * 30
+# 40 days flat within ±0.5 % band (neutral)
+_NEUTRAL_CLOSES = [float(1500 + ((-1) ** i) * 3) for i in range(40)]
+_NEUTRAL_VOLUMES = [float(1_000_000)] * 40
 
 # --------------------------------------------------------------------------- #
 # Tests
@@ -196,7 +196,7 @@ async def test_technical_short_history_returns_degraded() -> None:
 
 async def test_technical_missing_volume_uses_zero_gracefully() -> None:
     """Zero volume across all periods must not crash; agent still runs."""
-    zero_volumes = [0.0] * 30
+    zero_volumes = [0.0] * len(_BULLISH_CLOSES)
     md = _make_market_data(_BULLISH_CLOSES, zero_volumes)
     ctx = await _context()
     result = await run_technical_analysis("TEST", md, ctx)

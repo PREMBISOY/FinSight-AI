@@ -7,6 +7,18 @@ interface MarketCardProps {
 }
 
 export function MarketCard({ data }: MarketCardProps) {
+  const formatPrice = (value: number) => {
+    try {
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: data.currency,
+        minimumFractionDigits: 2,
+      }).format(value)
+    } catch {
+      return `${data.currency} ${value.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
+    }
+  }
+
   const chartData = data.history.map(p => ({
     date: new Date(p.timestamp).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }),
     close: p.close,
@@ -31,7 +43,7 @@ export function MarketCard({ data }: MarketCardProps) {
           </div>
           <div className="flex items-center gap-3 mt-1">
             <span className="text-3xl font-bold font-mono text-white">
-              {data.currency === 'INR' ? '₹' : '$'}{data.current_price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+              {formatPrice(data.current_price)}
             </span>
             <div className={`flex items-center gap-1 ${isPositive ? 'text-bullish' : 'text-bearish'}`}>
               {isPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
@@ -64,13 +76,13 @@ export function MarketCard({ data }: MarketCardProps) {
               axisLine={false}
               tickLine={false}
               width={60}
-              tickFormatter={v => `₹${v.toLocaleString('en-IN')}`}
+              tickFormatter={v => formatPrice(v)}
             />
             <Tooltip
               contentStyle={{ background: '#ffffff', border: '1px solid #e7e7e7', borderRadius: '4px', fontSize: '12px' }}
               labelStyle={{ color: '#666666' }}
               itemStyle={{ color: '#22c55e' }}
-              formatter={(value: number) => [`₹${value.toLocaleString('en-IN')}`, 'Close']}
+              formatter={(value: number) => [formatPrice(value), 'Close']}
             />
             <Line
               type="monotone"
@@ -85,7 +97,7 @@ export function MarketCard({ data }: MarketCardProps) {
       </div>
 
       <p className="text-xs text-slate-600">
-        7-session price history · {data.history.length} data points · {data.currency}
+        Price history · {data.history.length} data points · {data.currency}
       </p>
     </div>
   )

@@ -6,9 +6,7 @@ The backend is the system of record. The frontend does not call agents directly.
 
 `GET /health`
 
-```json
-{"status":"ok","service":"finsight-api","version":"0.1.0"}
-```
+The response retains `status`, `service`, and `version`, and includes an `integrations` object showing the active repository, Gemini configuration, model, grounding setting, market-data mode/provider, and snapshot-cache backend. Configuration status does not imply a successful external network probe.
 
 ## User context
 
@@ -40,9 +38,15 @@ The `200` response contains:
 - three complete `AgentOutput` objects
 - deterministic synthesis with score, agreement, completeness, conflict flag, contributions, and limitations
 - personalized recommendation and risk assessment
+- Gemini research insight with explicit status, model, latency, profile-specific considerations, risks, and Google Search grounding citations
+- the original query and scenario for auditability
 - ordered decision trace
 - evidence and measured latency/risk metrics
 - warnings for degraded or conflicting data
+
+`market_data.source` identifies Yahoo, a fresh cache, a stale cache, or the curated fallback, while `market_data.synthetic` is always `true` for fixture data. News and evidence carry their own source names, URLs, timestamps, and synthetic labels.
+
+Gemini is an explanation and current-context layer. It cannot change specialist classifications, deterministic synthesis scores, or the profile-specific recommendation. When Gemini is missing or fails, the deterministic analysis still returns and `ai_insight.status` is `unavailable` or `error`.
 
 Validation errors return HTTP `422`; missing users or symbols return `404`; an unexpected pipeline failure returns `500` without leaking secrets.
 

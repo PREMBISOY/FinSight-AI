@@ -29,7 +29,7 @@ def create_app(orchestrator: AnalysisOrchestrator | None = None) -> FastAPI:
     application.state.orchestrator = orchestrator or build_orchestrator()
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=[settings.frontend_origin],
+        allow_origins=settings.frontend_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -48,8 +48,8 @@ def create_app(orchestrator: AnalysisOrchestrator | None = None) -> FastAPI:
 
         @application.get("/{full_path:path}", include_in_schema=False)
         async def serve_frontend(full_path: str) -> FileResponse:
-            requested_file = FRONTEND_DIST / full_path
-            if requested_file.is_file():
+            requested_file = (FRONTEND_DIST / full_path).resolve()
+            if requested_file.is_relative_to(FRONTEND_DIST.resolve()) and requested_file.is_file():
                 return FileResponse(requested_file)
             return FileResponse(frontend_index)
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+import logging
 from typing import Any
 
 import httpx
@@ -14,6 +15,9 @@ from backend.app.schemas import (
     Portfolio,
     RiskTolerance,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class Repository(ABC):
@@ -111,9 +115,12 @@ class SupabaseRepository(Repository):
         self.base_url = f"{url.rstrip('/')}/rest/v1"
         self.headers = {
             "apikey": key,
-            "Authorization": f"Bearer {key}",
             "Content-Type": "application/json",
         }
+        # Opaque sb_secret_* keys authenticate through the apikey header. A
+        # legacy service_role JWT additionally belongs in Authorization.
+        if not key.startswith("sb_secret_"):
+            self.headers["Authorization"] = f"Bearer {key}"
         self.timeout = timeout
 
     async def _get_rows(self, table: str, params: dict[str, str]) -> list[dict[str, Any]]:
@@ -152,10 +159,16 @@ class SupabaseRepository(Repository):
                 "id": analysis.analysis_id,
                 "user_id": analysis.investor_profile.user_id,
                 "symbol": analysis.symbol,
+                "query": analysis.query,
+                "scenario": analysis.scenario.value,
                 "overall_classification": analysis.synthesis.outlook.value,
                 "overall_confidence": analysis.synthesis.confidence,
                 "recommendation": analysis.intelligence.recommendation.value,
                 "risk_score": analysis.intelligence.risk_score,
+                "llm_provider": analysis.ai_insight.provider,
+                "llm_model": analysis.ai_insight.model,
+                "llm_status": analysis.ai_insight.status,
+                "llm_grounded": analysis.ai_insight.grounded,
                 "payload": payload,
                 "created_at": analysis.created_at.isoformat(),
             },
@@ -217,4 +230,12 @@ class SupabaseRepository(Repository):
 def build_repository(config: Settings = settings) -> Repository:
     if config.has_supabase:
         return SupabaseRepository(config.supabase_url, config.supabase_key)
+    if config.supabase_url or config.supabase_key:
+        logger.warning(
+            "supabase_configuration_incomplete",
+            extra={
+                "has_url": bool(config.supabase_url),
+                "has_server_key": bool(config.supabase_key),
+            },
+        )
     return InMemoryRepository()

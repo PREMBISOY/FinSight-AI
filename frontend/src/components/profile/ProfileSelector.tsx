@@ -7,9 +7,11 @@ interface ProfileSelectorProps {
   selectedUserId: string
   selectedScenario: DemoScenario
   symbol: string
+  query: string
   onUserChange: (id: string) => void
   onScenarioChange: (s: DemoScenario) => void
   onSymbolChange: (s: string) => void
+  onQueryChange: (query: string) => void
   onAnalyze: () => void
   isRunning: boolean
 }
@@ -18,9 +20,11 @@ export function ProfileSelector({
   selectedUserId,
   selectedScenario,
   symbol,
+  query,
   onUserChange,
   onScenarioChange,
   onSymbolChange,
+  onQueryChange,
   onAnalyze,
   isRunning,
 }: ProfileSelectorProps) {
@@ -69,7 +73,16 @@ export function ProfileSelector({
             placeholder="RELIANCE"
             className="w-full bg-white border border-[#d7d7d7] rounded px-3.5 py-3 text-sm font-mono font-semibold tracking-wider text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-500 transition-colors"
           />
-          <p className="text-xs text-slate-500 mt-2">Listed Indian equities · demo defaults to RELIANCE</p>
+          <p className="text-xs text-slate-500 mt-2">Live Yahoo Finance inputs · NSE symbols use the .NS exchange suffix automatically</p>
+
+          <label className="block text-xs text-slate-500 mt-4 mb-2 uppercase tracking-wider">Research Question</label>
+          <textarea
+            value={query}
+            onChange={e => onQueryChange(e.target.value)}
+            maxLength={1000}
+            rows={3}
+            className="w-full resize-none bg-surface-600 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-brand-500/50 focus:bg-surface-500 transition-colors"
+          />
 
           {/* Scenario */}
           <label className="section-label block mt-5 mb-2.5">Pipeline Scenario</label>
@@ -117,10 +130,10 @@ export function ProfileSelector({
 
           <button
             onClick={onAnalyze}
-            disabled={isRunning || !symbol.trim()}
+            disabled={isRunning || !symbol.trim() || !query.trim()}
             className={clsx(
               'w-full mt-6 py-3 px-6 rounded font-medium text-sm transition-all flex items-center justify-center gap-2',
-              isRunning || !symbol.trim()
+              isRunning || !symbol.trim() || !query.trim()
                 ? 'bg-surface-500 text-slate-500 cursor-not-allowed'
                 : 'bg-brand-500 hover:bg-brand-600 text-white active:scale-[0.98]',
             )}

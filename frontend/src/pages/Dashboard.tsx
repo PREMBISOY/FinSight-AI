@@ -14,6 +14,7 @@ import { Zap, BarChart2, Brain, AlertTriangle, ArrowUpRight, SearchCheck, FileSe
 export function Dashboard() {
   const [userId, setUserId] = useState('conservative-demo')
   const [symbol, setSymbol] = useState('RELIANCE')
+  const [query, setQuery] = useState('What do the latest financial evidence and outlook imply?')
   const [scenario, setScenario] = useState<DemoScenario>('normal')
   const { state, result, error, run, reset } = useAnalysis()
 
@@ -32,8 +33,13 @@ export function Dashboard() {
     reset()
   }
 
+  const handleQueryChange = (nextQuery: string) => {
+    setQuery(nextQuery)
+    reset()
+  }
+
   const handleAnalyze = () => {
-    run({ user_id: userId, symbol, scenario })
+    run({ user_id: userId, symbol, query, scenario })
   }
 
   const isRunning = state === 'running'
@@ -46,9 +52,11 @@ export function Dashboard() {
         selectedUserId={userId}
         selectedScenario={scenario}
         symbol={symbol}
+        query={query}
         onUserChange={handleUserChange}
         onScenarioChange={handleScenarioChange}
         onSymbolChange={handleSymbolChange}
+        onQueryChange={handleQueryChange}
         onAnalyze={handleAnalyze}
         isRunning={isRunning}
       />

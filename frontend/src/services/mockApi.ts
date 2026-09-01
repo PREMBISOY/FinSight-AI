@@ -16,6 +16,7 @@ import type {
   MarketData,
   Portfolio,
   InvestorProfile,
+  AIInsight,
 } from '../types/api'
 
 // ---- Shared market data fixture ----
@@ -40,7 +41,7 @@ const RELIANCE_MARKET_DATA: MarketData = {
 // ---- User profiles ----
 const CONSERVATIVE_PROFILE: InvestorProfile = {
   user_id: 'conservative-demo',
-  display_name: 'Priya Mehta (Conservative)',
+  display_name: 'Conservative Priya',
   risk_tolerance: 'conservative',
   investment_horizon: 'long',
   max_position_size: 15,
@@ -49,34 +50,28 @@ const CONSERVATIVE_PROFILE: InvestorProfile = {
 
 const AGGRESSIVE_PROFILE: InvestorProfile = {
   user_id: 'aggressive-demo',
-  display_name: 'Rahul Sharma (Aggressive)',
+  display_name: 'Aggressive Arjun',
   risk_tolerance: 'aggressive',
   investment_horizon: 'short',
-  max_position_size: 40,
+  max_position_size: 20,
   created_at: '2026-01-01T00:00:00Z',
 }
 
 const CONSERVATIVE_PORTFOLIO: Portfolio = {
   user_id: 'conservative-demo',
   holdings: [
-    { symbol: 'RELIANCE', quantity: 150, allocation_percent: 25.0 },
-    { symbol: 'TCS', quantity: 80, allocation_percent: 18.0 },
-    { symbol: 'INFY', quantity: 200, allocation_percent: 12.0 },
-    { symbol: 'HDFC', quantity: 120, allocation_percent: 15.0 },
-    { symbol: 'ITC', quantity: 500, allocation_percent: 8.0 },
-    { symbol: 'OTHERS', quantity: 0, allocation_percent: 22.0 },
+    { symbol: 'RELIANCE', quantity: 42, allocation_percent: 25.0 },
+    { symbol: 'TCS', quantity: 15, allocation_percent: 18.0 },
+    { symbol: 'HDFCBANK', quantity: 30, allocation_percent: 14.0 },
   ],
 }
 
 const AGGRESSIVE_PORTFOLIO: Portfolio = {
   user_id: 'aggressive-demo',
   holdings: [
-    { symbol: 'RELIANCE', quantity: 40, allocation_percent: 5.0 },
-    { symbol: 'ADANI', quantity: 200, allocation_percent: 22.0 },
-    { symbol: 'PAYTM', quantity: 500, allocation_percent: 15.0 },
-    { symbol: 'NYKAA', quantity: 300, allocation_percent: 18.0 },
-    { symbol: 'ZOMATO', quantity: 600, allocation_percent: 20.0 },
-    { symbol: 'OTHERS', quantity: 0, allocation_percent: 20.0 },
+    { symbol: 'RELIANCE', quantity: 8, allocation_percent: 5.0 },
+    { symbol: 'TCS', quantity: 12, allocation_percent: 12.0 },
+    { symbol: 'INFY', quantity: 20, allocation_percent: 10.0 },
   ],
 }
 
@@ -346,7 +341,6 @@ const SYNTHESIS_CONFLICT: SynthesisResult = {
 
 function makeIntelligence(
   userId: string,
-  outlook: string,
   synthesis: SynthesisResult,
 ): PersonalizedIntelligence {
   const isConservative = userId === 'conservative-demo'
@@ -389,11 +383,27 @@ function makeIntelligence(
       portfolio_exposure_percent: 5.0,
       reasons: [
         'Market outlook is MODERATELY_BULLISH with strong technical and fundamental confirmation.',
-        'Current exposure of 5% is well below the 40% maximum position size.',
+        'Current exposure of 5% is well below the 20% maximum position size.',
         'Aggressive profile and short horizon support acting on bullish signals.',
       ],
       disclaimer: 'Prototype investment intelligence, not financial advice.',
     }
+  }
+}
+
+function makeMockAIInsight(userId: string, intelligence: PersonalizedIntelligence): AIInsight {
+  const profileLabel = userId === 'conservative-demo' ? 'conservative long-horizon' : 'aggressive short-horizon'
+  return {
+    status: 'success',
+    provider: 'mock',
+    model: 'mock-only',
+    grounded: false,
+    summary: `Demo-only explanation for the ${profileLabel} profile. The deterministic recommendation is ${intelligence.recommendation}.`,
+    profile_specific_guidance: intelligence.reasons,
+    key_risks: ['Mock mode does not contain current web research or live market data.'],
+    citations: [],
+    latency_ms: 0,
+    limitation: 'Explicit frontend mock mode is active; Gemini was not called.',
   }
 }
 
@@ -490,12 +500,12 @@ const USER_CONTEXTS: Record<string, UserContext> = {
   'conservative-demo': {
     profile: CONSERVATIVE_PROFILE,
     portfolio: CONSERVATIVE_PORTFOLIO,
-    watchlist: ['TCS', 'HDFC', 'INFY', 'WIPRO'],
+    watchlist: ['RELIANCE', 'TCS', 'HDFCBANK'],
   },
   'aggressive-demo': {
     profile: AGGRESSIVE_PROFILE,
     portfolio: AGGRESSIVE_PORTFOLIO,
-    watchlist: ['RELIANCE', 'ADANIENT', 'PAYTM', 'NYKAA', 'ZOMATO', 'DELHIVERY'],
+    watchlist: ['RELIANCE', 'TCS', 'INFY'],
   },
 }
 
@@ -518,7 +528,11 @@ export async function mockAnalyze(request: AnalyzeRequest): Promise<AnalysisResp
   await delay(MOCK_DELAY_MS)
 
   const userId = request.user_id
-  const userCtx = USER_CONTEXTS[userId] ?? USER_CONTEXTS['conservative-demo']
+  const userCtx = USER_CONTEXTS[userId]
+  if (!userCtx) throw new Error(`User not found: ${userId}`)
+  if (request.symbol.toUpperCase() !== 'RELIANCE') {
+    throw new Error('Mock mode only contains the RELIANCE fixture. Use the live backend for other symbols.')
+  }
   const scenario = request.scenario
 
   let agents: AgentOutput[]
@@ -539,7 +553,8 @@ export async function mockAnalyze(request: AnalyzeRequest): Promise<AnalysisResp
     warnings = []
   }
 
-  const intelligence = makeIntelligence(userId, synthesis.outlook, synthesis)
+  const intelligence = makeIntelligence(userId, synthesis)
+  const aiInsight = makeMockAIInsight(userId, intelligence)
   const decisionTrace = makeDecisionTrace(agents, synthesis, intelligence)
   const metrics = makeMetrics(agents, synthesis)
 
@@ -547,6 +562,8 @@ export async function mockAnalyze(request: AnalyzeRequest): Promise<AnalysisResp
     analysis_id: `mock-${scenario}-${userId}-${Date.now()}`,
     created_at: new Date().toISOString(),
     symbol: request.symbol.toUpperCase(),
+    query: request.query ?? 'What do the latest financial evidence and outlook imply?',
+    scenario,
     market_data: RELIANCE_MARKET_DATA,
     investor_profile: userCtx.profile,
     portfolio: userCtx.portfolio,
@@ -554,6 +571,7 @@ export async function mockAnalyze(request: AnalyzeRequest): Promise<AnalysisResp
     agent_results: agents,
     synthesis,
     intelligence,
+    ai_insight: aiInsight,
     decision_trace: decisionTrace,
     metrics,
     warnings,

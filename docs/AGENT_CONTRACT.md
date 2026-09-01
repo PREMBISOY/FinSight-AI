@@ -13,7 +13,7 @@ Every specialist agent implements an asynchronous function and returns `AgentOut
       "name": "price_momentum_5d",
       "value": 0.041,
       "interpretation": "Five-session price momentum is positive.",
-      "source": "curated_market_fixture"
+      "source": "yahoo_finance:RELIANCE.NS"
     }
   ],
   "reasoning": ["Price and volume signals support a bullish classification."],
@@ -33,7 +33,7 @@ Every specialist agent implements an asynchronous function and returns `AgentOut
 - `signals`, `reasoning`, `evidence`, and `limitations`: arrays, never hidden prose blobs.
 - `latency_ms`: elapsed wall-clock time measured by the implementation.
 - `unavailable` and `error` must use `UNKNOWN` with zero confidence.
-- Evidence must identify its source and whether it is synthetic or curated.
+- Evidence must identify its source and whether it is synthetic. Live sources retain their provider URL and timestamp when available.
 - Retrieved document evidence includes a chunk ID and relevance score.
 - Agents never return portfolio recommendations.
 - Agents never invent a classification or citation when evidence is insufficient.

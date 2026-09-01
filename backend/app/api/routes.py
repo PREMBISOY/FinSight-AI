@@ -27,8 +27,22 @@ def get_orchestrator(request: Request) -> AnalysisOrchestrator:
 
 
 @router.get("/health", tags=["system"])
-async def health() -> dict[str, str]:
-    return {"status": "ok", "service": "finsight-api", "version": settings.app_version}
+async def health(request: Request) -> dict[str, object]:
+    repository_name = type(request.app.state.orchestrator.repository).__name__
+    return {
+        "status": "ok",
+        "service": "finsight-api",
+        "version": settings.app_version,
+        "integrations": {
+            "database": "supabase" if repository_name == "SupabaseRepository" else "memory",
+            "gemini": "configured" if settings.has_gemini else "unconfigured",
+            "gemini_model": settings.gemini_model,
+            "google_search_grounding": settings.gemini_grounding,
+            "market_data_mode": settings.data_mode,
+            "market_data_provider": "yahoo_finance" if settings.data_mode != "fixture" else "fixture",
+            "snapshot_cache": "supabase" if settings.has_supabase else "memory",
+        },
+    }
 
 
 async def _user_context(user_id: str, service: AnalysisOrchestrator) -> UserContext:

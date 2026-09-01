@@ -95,7 +95,10 @@ class SentimentAnalysisResult:
 # Public API
 # ---------------------------------------------------------------------------
 
-def analyze_news_sentiment(news_items: list[NewsItem]) -> SentimentAnalysisResult:
+def analyze_news_sentiment(
+    news_items: list[NewsItem],
+    source_label: str = "provided news items",
+) -> SentimentAnalysisResult:
     """
     Deterministic lexicon-based sentiment analysis.
 
@@ -180,31 +183,31 @@ def analyze_news_sentiment(news_items: list[NewsItem]) -> SentimentAnalysisResul
                 "Weighted lexicon balance (–1 = all negative, +1 = all positive). "
                 "Headlines are weighted 2× summaries."
             ),
-            source="curated news fixture",
+            source=source_label,
         ),
         Signal(
             name="news_item_count",
             value=len(news_items),
             interpretation="Number of attributed news items evaluated.",
-            source="curated news fixture",
+            source=source_label,
         ),
         Signal(
             name="headline_score",
             value=round(headline_score, 4),
             interpretation="Lexicon balance for headline text only.",
-            source="curated news fixture",
+            source=source_label,
         ),
         Signal(
             name="summary_score",
             value=round(summary_score, 4),
             interpretation="Lexicon balance for summary text only.",
-            source="curated news fixture",
+            source=source_label,
         ),
         Signal(
             name="source_diversity",
             value=len(sources),
             interpretation="Number of distinct news sources contributing.",
-            source="curated news fixture",
+            source=source_label,
         ),
     ]
 
@@ -227,10 +230,9 @@ def analyze_news_sentiment(news_items: list[NewsItem]) -> SentimentAnalysisResul
             "No domain-specific lexicon terms were matched; "
             "the NEUTRAL classification reflects absence of signal, not confirmed neutrality."
         )
-    limitations.append(
-        "Sprint 1 lexicon model — not a production financial classifier. "
-        "All news sources are labeled as synthetic/curated."
-    )
+    limitations.append("Lexicon sentiment is not a substitute for a production financial classifier.")
+    if all(item.synthetic for item in news_items):
+        limitations.append("All evaluated news items are labeled synthetic/curated.")
 
     return SentimentAnalysisResult(
         classification=classification,

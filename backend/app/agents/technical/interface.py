@@ -31,7 +31,7 @@ from backend.app.schemas import (
     Signal,
 )
 
-from .indicators import ema, macd, momentum, rsi, sma, volatility, volume_ratio
+from .indicators import macd, momentum, rsi, sma, volatility, volume_ratio
 
 # --------------------------------------------------------------------------- #
 # Thresholds
@@ -45,7 +45,7 @@ _VOL_RATIO_LOW = 0.70       # volume drought weakens signal
 _VOLATILITY_HIGH = 0.04     # coefficient of variation > 4 % → note in metadata
 
 # Minimum history length thresholds
-_MIN_FOR_FULL = 20   # need ≥ 26 for MACD; we degrade below 20
+_MIN_FOR_FULL = 34   # MACD(12, 26, 9) needs slow + signal - 1 observations
 _MIN_FOR_ANY = 2     # need at least 2 points for momentum
 
 # Classification score thresholds
@@ -219,7 +219,7 @@ async def run_technical_analysis(
     if macd_result is not None:
         macd_line, signal_line = macd_result
         macd_gap = macd_line - signal_line
-        votes["macd"] = _vote(macd_gap, 0.0, 0.0)   # any positive gap → bullish
+        votes["macd"] = _vote(macd_gap, 1e-9, -1e-9)
         signals.append(Signal(
             name="macd",
             value=round(macd_gap, 4),
