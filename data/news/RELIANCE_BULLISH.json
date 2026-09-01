@@ -1,0 +1,52 @@
+[
+  {
+    "id": "news-rel-bull-001",
+    "symbol": "RELIANCE",
+    "headline": "Reliance Industries posts record quarterly profit on strong retail and digital growth",
+    "summary": "Strong revenue and expanding margins beat analyst estimates. Management guidance upgraded on robust demand outlook.",
+    "source_name": "HackVerse Curated News",
+    "published_at": "2026-09-01T07:00:00+05:30",
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "id": "news-rel-bull-002",
+    "symbol": "RELIANCE",
+    "headline": "Reliance Jio subscriber additions accelerate, rebound in ARPU signals momentum",
+    "summary": "Telecom division gains gaining momentum with improving average revenue per user. Bullish outlook from multiple brokerages following upgrade.",
+    "source_name": "HackVerse Curated News",
+    "published_at": "2026-09-01T07:30:00+05:30",
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "id": "news-rel-bull-003",
+    "symbol": "RELIANCE",
+    "headline": "Retail expansion supports strong growth trajectory for Reliance",
+    "summary": "Store footprint expansion and growing e-commerce demand resilient. Recovery in consumer spending positive for outlook.",
+    "source_name": "HackVerse Curated News",
+    "published_at": "2026-09-01T08:00:00+05:30",
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "id": "news-rel-bull-004",
+    "symbol": "RELIANCE",
+    "headline": "Analysts raise Reliance target price after capital investment win in green energy",
+    "summary": "Major investment in renewables expected to drive long-term revenue gains. Brokers optimistic and confident in strong upside potential.",
+    "source_name": "HackVerse Curated News",
+    "published_at": "2026-09-01T08:30:00+05:30",
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "id": "news-rel-bull-005",
+    "symbol": "RELIANCE",
+    "headline": "Reliance stock rallied to record high on solid operating performance",
+    "summary": "Solid earnings and robust demand outlook lifted the stock. Institutional buying accelerating after outperform ratings reaffirmed.",
+    "source_name": "HackVerse Curated News",
+    "published_at": "2026-09-01T09:00:00+05:30",
+    "url": null,
+    "synthetic": true
+  }
+]
