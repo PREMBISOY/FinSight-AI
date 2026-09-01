@@ -216,7 +216,6 @@ export function Dashboard({ account }: DashboardProps) {
               <IntelligenceCard
                 intelligence={result.intelligence}
                 profile={result.investor_profile}
-                displayName={account.name}
               />
             </div>
           </div>

@@ -5,7 +5,6 @@ import { RecommendationBadge, getRecGlow } from '../shared/Badges'
 interface IntelligenceCardProps {
   intelligence: PersonalizedIntelligence
   profile: InvestorProfile
-  displayName: string
 }
 
 const RISK_CONFIG = {
@@ -69,7 +68,7 @@ function ExposureDonut({ exposure, maxSize }: { exposure: number; maxSize: numbe
   )
 }
 
-export function IntelligenceCard({ intelligence, profile, displayName }: IntelligenceCardProps) {
+export function IntelligenceCard({ intelligence, profile }: IntelligenceCardProps) {
   const glow = getRecGlow(intelligence.recommendation)
 
   return (
@@ -85,7 +84,7 @@ export function IntelligenceCard({ intelligence, profile, displayName }: Intelli
       <div className="flex flex-col items-center py-3 gap-3">
         <RecommendationBadge value={intelligence.recommendation} />
         <p className="text-xs text-slate-500 text-center px-2">
-          Tailored for <strong className="text-slate-800 dark:text-slate-300">{displayName}</strong> ·{' '}
+          Tailored for <strong className="text-slate-800 dark:text-slate-300">{profile.display_name}</strong> ·{' '}
           {profile.risk_tolerance} risk · {profile.investment_horizon} horizon
         </p>
       </div>

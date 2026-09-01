@@ -22,8 +22,6 @@ Copy `.env.example` values into your local environment or Railway variables. Gem
 
 `DATA_MODE=live` is the production default. It loads keyless, near-real-time prices, attributable news, and public financial statements through yfinance/Yahoo Finance, and reuses only successful Yahoo snapshots from Supabase when configured (including an expired snapshot during a temporary provider outage). If neither live data nor a real cached snapshot is available, the affected dataset is reported unavailable—production never substitutes synthetic data. `DATA_MODE=hybrid` is a backwards-compatible alias with the same live-and-cache-only behavior. `DATA_MODE=fixture` is the only mode that uses deterministic synthetic data, for development and tests. You can enter an NSE ticker (`RELIANCE`), a BSE ticker (`RELIANCE.BO`), or a company name; name searches resolve to an NSE/BSE Yahoo Finance equity and prefer NSE when both listings exist. Human-friendly index aliases are also supported: `NIFTY 50`/`NIFTY50`, `SENSEX`/`BSE SENSEX`, and `BANK NIFTY`.
 
-Gemini is an optional explanation layer. If its quota is exhausted or the service is unavailable, the frontend shows **AI explanation temporarily unavailable** and continues to display the deterministic technical, fundamental, sentiment, synthesis, and personalized recommendation results. The frontend does not automatically retry a failed Gemini request.
-
 ## Database and persistence
 
 The application has two repository modes:
@@ -39,7 +37,7 @@ Apply the migrations in this exact order; the application does not run them auto
 
 Database access is backend-only. The migrations revoke access from `anon` and `authenticated` and grant it to `service_role`; never expose `SUPABASE_SECRET_KEY` or `SUPABASE_SERVICE_ROLE_KEY` in Vite variables or browser code. `SUPABASE_ANON_KEY` is retained as an environment placeholder but is deliberately not used by the persistence layer.
 
-The frontend login is a demo-only browser account stored in local/session storage. It maps the signed-in name to either `conservative-demo` or `aggressive-demo`; it does **not** use Supabase Auth and does not create an investor profile or any other database row. The signed-in name is used in user-facing profile and personalized-intelligence cards, while the selected demo profile continues to supply risk tolerance, investment horizon, portfolio holdings, and position limits. The corresponding backend profiles must already exist from the migrations (or from the in-memory seed data).
+The frontend login is a demo-only browser account stored in local/session storage. It maps the signed-in name to either `conservative-demo` or `aggressive-demo`; it does **not** use Supabase Auth and does not create an investor profile or any other database row. The corresponding backend profiles must already exist from the migrations (or from the in-memory seed data).
 
 Successful analyses store the complete response in `analyses.payload` and also write normalized agent results, metrics, and flattened evidence for inspection. These PostgREST inserts are currently sequential rather than one database transaction, so an interrupted or failed child insert can leave a partial analysis record. Snapshot cache failures are non-fatal: the data service logs them and continues with the live provider or a previously loaded real snapshot when available. Default snapshot TTLs are 15 minutes for market data, 30 minutes for news, and 6 hours for fundamentals.
 

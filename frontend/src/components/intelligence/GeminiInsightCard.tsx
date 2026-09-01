@@ -12,12 +12,9 @@ export function GeminiInsightCard({ insight, question }: GeminiInsightCardProps)
       <div className="card p-5 border-amber-500/25 flex items-start gap-3 animate-fade-in">
         <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
         <div>
-          <h3 className="section-label text-amber-500">AI explanation temporarily unavailable</h3>
+          <h3 className="section-label text-amber-500">Gemini could not answer</h3>
           <p className="text-sm text-slate-700 dark:text-slate-300 mt-2">{question}</p>
           <p className="text-xs text-slate-500 mt-1">{insight.limitation}</p>
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-2">
-            The deterministic analysis and personalized recommendation below are still available.
-          </p>
         </div>
       </div>
     )
