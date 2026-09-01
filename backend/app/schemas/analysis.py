@@ -81,7 +81,11 @@ class AnalyzeRequest(BaseModel):
     @field_validator("symbol", mode="before")
     @classmethod
     def normalize_symbol(cls, value: object) -> object:
-        return canonical_symbol(value) if isinstance(value, str) else value
+        if not isinstance(value, str):
+            return value
+        if "/" in value or "\\" in value:
+            raise ValueError("symbol must not contain path separators")
+        return canonical_symbol(value)
 
     @field_validator("user_id", "query")
     @classmethod
