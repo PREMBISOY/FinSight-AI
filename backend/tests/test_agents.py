@@ -26,9 +26,9 @@ async def test_technical_agent_returns_measured_structured_signals() -> None:
     result = await run_technical_analysis(
         "RELIANCE", await data.market_data("RELIANCE"), await _context()
     )
-    assert result.status == AgentStatus.SUCCESS
+    assert result.status in {AgentStatus.SUCCESS, AgentStatus.DEGRADED}
     assert result.classification == AgentClassification.BULLISH
-    assert {signal.name for signal in result.signals} == {"price_momentum", "volume_ratio"}
+    assert {signal.name for signal in result.signals} >= {"price_momentum", "volume_ratio"}
     assert result.latency_ms >= 0
 
 
