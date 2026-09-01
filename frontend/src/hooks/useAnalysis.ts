@@ -42,8 +42,8 @@ export function useAnalysis(): UseAnalysisReturn {
 
 // Demo user IDs
 export const DEMO_USERS = [
-  { id: 'conservative-demo', label: 'Conservative Priya', subtitle: 'Conservative · Long Horizon · 25% RELIANCE' },
-  { id: 'aggressive-demo', label: 'Aggressive Arjun', subtitle: 'Aggressive · Short Horizon · 5% RELIANCE' },
+  { id: 'conservative-demo', label: 'Priya Mehta', subtitle: 'Conservative · Long Horizon · 25% RELIANCE' },
+  { id: 'aggressive-demo', label: 'Rahul Sharma', subtitle: 'Aggressive · Short Horizon · 5% RELIANCE' },
 ]
 
 export const DEMO_SCENARIOS: { value: DemoScenario; label: string; description: string }[] = [

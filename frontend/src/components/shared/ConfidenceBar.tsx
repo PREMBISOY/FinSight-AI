@@ -1,75 +1,128 @@
-import clsx from 'clsx'
+import { useEffect, useRef } from 'react'
 
-interface ConfidenceBarProps {
-  value: number // 0–1
+interface ConfidenceRingProps {
+  value: number        // 0–1
+  size?: number        // px
+  strokeWidth?: number
   label?: string
-  size?: 'sm' | 'md' | 'lg'
+  showPct?: boolean
 }
 
-function getConfidenceColor(v: number): string {
-  if (v >= 0.75) return 'bg-bullish'
-  if (v >= 0.50) return 'bg-yellow-400'
-  if (v >= 0.25) return 'bg-orange-400'
-  return 'bg-bearish'
+function ringColor(v: number) {
+  if (v >= 0.70) return '#00d09c'
+  if (v >= 0.45) return '#f59e0b'
+  return '#ff5252'
 }
 
-export function ConfidenceBar({ value, label, size = 'md' }: ConfidenceBarProps) {
-  const pct = Math.round(value * 100)
-  const color = getConfidenceColor(value)
-  const heights = { sm: 'h-1', md: 'h-2', lg: 'h-3' }
+export function ConfidenceRing({ value, size = 80, strokeWidth = 8, label, showPct = true }: ConfidenceRingProps) {
+  const r       = (size - strokeWidth) / 2
+  const circum  = 2 * Math.PI * r
+  const offset  = circum * (1 - Math.min(1, Math.max(0, value)))
+  const color   = ringColor(value)
+  const ringRef = useRef<SVGCircleElement>(null)
+
+  useEffect(() => {
+    const el = ringRef.current
+    if (!el) return
+    el.style.setProperty('--ring-offset', String(offset))
+    el.style.strokeDashoffset = String(circum)
+    void el.getBoundingClientRect()
+    el.style.transition = 'stroke-dashoffset 1s ease-out'
+    el.style.strokeDashoffset = String(offset)
+  }, [value, offset, circum])
 
   return (
-    <div className="w-full">
-      {label && (
-        <div className="flex justify-between items-center mb-1">
-          <span className="text-xs text-slate-400">{label}</span>
-          <span className="text-xs font-mono font-semibold text-slate-200">{pct}%</span>
-        </div>
-      )}
-      <div className={clsx('w-full bg-surface-400 rounded-full overflow-hidden', heights[size])}>
-        <div
-          className={clsx('h-full rounded-full transition-all duration-700', color)}
-          style={{ width: `${pct}%` }}
-        />
+    <div className="flex flex-col items-center gap-1.5">
+      <div style={{ width: size, height: size }} className="relative flex-shrink-0">
+        <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+          <circle
+            cx={size / 2} cy={size / 2} r={r}
+            className="ring-track"
+          />
+          <circle
+            ref={ringRef}
+            cx={size / 2} cy={size / 2} r={r}
+            className="ring-fill"
+            stroke={color}
+            strokeDasharray={circum}
+            strokeDashoffset={circum}
+            strokeLinecap="round"
+          />
+        </svg>
+        {showPct && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-sm font-bold font-mono" style={{ color }}>
+              {Math.round(value * 100)}%
+            </span>
+          </div>
+        )}
       </div>
-      {!label && (
-        <div className="mt-1 text-right">
-          <span className="text-xs font-mono text-slate-400">{pct}%</span>
-        </div>
+      {label && (
+        <span className="text-[10px] text-slate-500 uppercase tracking-wider text-center">{label}</span>
       )}
     </div>
   )
 }
 
-// ---- Score bar (for market score -1 to +1) ----
+interface ConfidenceBarProps {
+  value: number
+  label?: string
+  size?: 'sm' | 'md'
+}
+
+export function ConfidenceBar({ value, label, size = 'md' }: ConfidenceBarProps) {
+  const color = ringColor(value)
+  const h = size === 'sm' ? 'h-1' : 'h-1.5'
+  return (
+    <div className="space-y-1">
+      {label && (
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-slate-500">{label}</span>
+          <span className="font-mono font-semibold" style={{ color }}>
+            {Math.round(value * 100)}%
+          </span>
+        </div>
+      )}
+      <div className={`score-bar-track ${h}`}>
+        <div
+          className="score-bar-fill"
+          style={{ width: `${value * 100}%`, background: color }}
+        />
+      </div>
+    </div>
+  )
+}
 
 interface ScoreBarProps {
-  value: number // -1 to 1
+  value: number   // -1 to +1
   label?: string
 }
 
 export function ScoreBar({ value, label }: ScoreBarProps) {
-  const pct = ((value + 1) / 2) * 100 // normalize to 0–100
-  const color = value > 0.1 ? 'bg-bullish' : value < -0.1 ? 'bg-bearish' : 'bg-neutral'
+  const clamped = Math.min(1, Math.max(-1, value))
+  const isPos   = clamped >= 0
+  const pct     = Math.abs(clamped) * 50  // half bar for each direction
+  const color   = clamped > 0.05 ? '#00d09c' : clamped < -0.05 ? '#ff5252' : '#94a3b8'
 
   return (
-    <div className="w-full">
+    <div className="space-y-1">
       {label && (
-        <div className="flex justify-between items-center mb-1">
-          <span className="text-xs text-slate-400">{label}</span>
-          <span className={clsx('text-xs font-mono font-semibold', value > 0.1 ? 'text-bullish' : value < -0.1 ? 'text-bearish' : 'text-slate-300')}>
-            {value > 0 ? '+' : ''}{value.toFixed(3)}
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-slate-500">{label}</span>
+          <span className="font-mono font-semibold" style={{ color }}>
+            {clamped > 0 ? '+' : ''}{clamped.toFixed(2)}
           </span>
         </div>
       )}
-      <div className="relative w-full h-2 bg-surface-400 rounded-full overflow-hidden">
-        {/* Center marker */}
-        <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-500 z-10" />
+      <div className="relative h-1.5 rounded-full bg-surface-500 overflow-hidden">
+        {/* centre line */}
+        <div className="absolute top-0 left-1/2 w-px h-full bg-surface-300 z-10" />
         <div
-          className={clsx('absolute h-full rounded-full transition-all duration-700', color)}
+          className="absolute top-0 h-full rounded-full transition-all duration-700"
           style={{
-            left: value >= 0 ? '50%' : `${pct}%`,
-            width: `${Math.abs(value) * 50}%`,
+            left:  isPos ? '50%' : `${50 - pct}%`,
+            width: `${pct}%`,
+            background: color,
           }}
         />
       </div>

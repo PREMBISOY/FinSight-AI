@@ -9,73 +9,142 @@ import { IntelligenceCard } from '../components/intelligence/IntelligenceCard'
 import { DecisionTrace } from '../components/trace/DecisionTrace'
 import { MetricsPanel } from '../components/shared/MetricsPanel'
 import { DegradedWarning } from '../components/shared/DegradedWarning'
-import { Zap, BarChart2, Brain, AlertTriangle, ArrowUpRight, SearchCheck, FileSearch, Radio } from 'lucide-react'
+import {
+  AlertTriangle, BarChart2, Brain, Zap,
+  TrendingUp, ShieldCheck, Activity, ArrowRight,
+} from 'lucide-react'
 
+// ── Idle hero ────────────────────────────────────────────────────────────────
+function IdleHero() {
+  return (
+    <div className="animate-fade-in">
+      {/* Hero copy */}
+      <div className="text-center pt-10 pb-8 px-4">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-semibold mb-6">
+          <Activity className="w-3 h-3" />
+          HackVerse: Into the Web · PS-01
+        </div>
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight mb-4">
+          <span className="bg-gradient-to-r from-brand-400 to-purple-400 bg-clip-text text-transparent">
+            Explainable Financial<br />
+            Intelligence
+          </span>
+        </h1>
+        <p className="text-slate-500 dark:text-slate-400 text-base max-w-lg mx-auto leading-relaxed">
+          Three independent AI agents — technical, fundamental, and sentiment —
+          synthesized into a single personalized recommendation with full decision trace.
+        </p>
+      </div>
+
+      {/* Feature cards */}
+      <div className="grid sm:grid-cols-3 gap-4 max-w-3xl mx-auto px-4 pb-10">
+        {[
+          {
+            icon: BarChart2,
+            color: 'text-blue-500 dark:text-blue-400',
+            bg:   'bg-blue-500/10 border-blue-500/20',
+            title: 'Technical Analysis',
+            desc:  'Price momentum, RSI-14, MACD, SMA cross, volume anomaly, and volatility signals with confidence-weighted voting.',
+          },
+          {
+            icon: Brain,
+            color: 'text-amber-500 dark:text-amber-400',
+            bg:   'bg-amber-500/10 border-amber-500/20',
+            title: 'Fundamental RAG',
+            desc:  'Earnings context and financial documents retrieved via semantic search with evidence attribution and relevance scores.',
+          },
+          {
+            icon: Activity,
+            color: 'text-purple-500 dark:text-purple-400',
+            bg:   'bg-purple-500/10 border-purple-500/20',
+            title: 'Sentiment Analysis',
+            desc:  'Live news pulse, market mood scoring, and multi-source sentiment aggregation with recency weighting.',
+          },
+        ].map(({ icon: Icon, color, bg, title, desc }) => (
+          <div key={title} className={`card p-5 border ${bg} animate-float`} style={{ animationDelay: `${Math.random() * 0.5}s` }}>
+            <div className={`w-9 h-9 rounded-lg ${bg} flex items-center justify-center mb-4`}>
+              <Icon className={`w-5 h-5 ${color}`} />
+            </div>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1.5">{title}</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">{desc}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Pipeline diagram */}
+      <div className="max-w-2xl mx-auto px-4 pb-12">
+        <div className="card p-5">
+          <h4 className="section-label mb-5 text-center">Pipeline</h4>
+          <div className="flex items-center justify-between gap-2 overflow-x-auto">
+            {[
+              { label: 'Market Data', icon: TrendingUp,   color: 'text-blue-400',   bg: 'bg-blue-500/10'   },
+              { label: 'Agents',      icon: Zap,           color: 'text-amber-400',  bg: 'bg-amber-500/10'  },
+              { label: 'Synthesis',   icon: Brain,          color: 'text-purple-400', bg: 'bg-purple-500/10' },
+              { label: 'Intelligence',icon: ShieldCheck,   color: 'text-emerald-400',bg: 'bg-emerald-500/10'},
+            ].map(({ label, icon: Icon, color, bg }, idx, arr) => (
+              <div key={label} className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center`}>
+                    <Icon className={`w-5 h-5 ${color}`} />
+                  </div>
+                  <span className="text-[10px] text-slate-500 uppercase tracking-wider">{label}</span>
+                </div>
+                {idx < arr.length - 1 && (
+                  <ArrowRight className="w-4 h-4 text-surface-400 flex-shrink-0 mb-3" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Main Dashboard ────────────────────────────────────────────────────────────
 export function Dashboard() {
-  const [userId, setUserId] = useState('conservative-demo')
-  const [symbol, setSymbol] = useState('RELIANCE')
-  const [query, setQuery] = useState('What do the latest financial evidence and outlook imply?')
+  const [userId,   setUserId]   = useState('conservative-demo')
+  const [symbol,   setSymbol]   = useState('RELIANCE')
   const [scenario, setScenario] = useState<DemoScenario>('normal')
   const { state, result, error, run, reset } = useAnalysis()
 
-  const handleUserChange = (nextUserId: string) => {
-    setUserId(nextUserId)
-    reset()
-  }
-
-  const handleScenarioChange = (nextScenario: DemoScenario) => {
-    setScenario(nextScenario)
-    reset()
-  }
-
-  const handleSymbolChange = (nextSymbol: string) => {
-    setSymbol(nextSymbol)
-    reset()
-  }
-
-  const handleQueryChange = (nextQuery: string) => {
-    setQuery(nextQuery)
-    reset()
-  }
-
-  const handleAnalyze = () => {
-    run({ user_id: userId, symbol, query, scenario })
-  }
+  const handleUserChange     = (id: string)          => { setUserId(id);       reset() }
+  const handleScenarioChange = (s: DemoScenario)     => { setScenario(s);      reset() }
+  const handleSymbolChange   = (s: string)           => { setSymbol(s);        reset() }
+  const handleAnalyze        = ()                    => run({ user_id: userId, symbol, scenario })
 
   const isRunning = state === 'running'
 
   return (
-    <div className="max-w-6xl mx-auto px-5 sm:px-6 py-8 sm:py-10 space-y-7">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
 
-      {/* ---- Controls ---- */}
+      {/* Controls */}
       <ProfileSelector
         selectedUserId={userId}
         selectedScenario={scenario}
         symbol={symbol}
-        query={query}
         onUserChange={handleUserChange}
         onScenarioChange={handleScenarioChange}
         onSymbolChange={handleSymbolChange}
-        onQueryChange={handleQueryChange}
         onAnalyze={handleAnalyze}
         isRunning={isRunning}
       />
 
-      {/* ---- Error state ---- */}
+      {/* Error */}
       {state === 'error' && error && (
-        <div className="flex items-start gap-3 px-4 py-3 bg-bearish/10 border border-bearish/30 rounded-lg animate-fade-in">
-          <AlertTriangle className="w-4 h-4 text-bearish flex-shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 px-4 py-3 bg-red-500/8 border border-red-500/25 rounded-xl animate-fade-in">
+          <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
           <div>
-            <span className="text-sm font-semibold text-bearish">Analysis failed</span>
+            <span className="text-sm font-semibold text-red-400">Analysis failed</span>
             <p className="text-xs text-slate-400 mt-0.5">{error}</p>
           </div>
         </div>
       )}
 
-      {/* ---- Running skeleton / Agent status ---- */}
+      {/* Pipeline row — visible while running or after complete */}
       {(isRunning || result) && (
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          <div className="flex items-center gap-2 section-label">
             <Zap className="w-3.5 h-3.5 text-brand-400" />
             Agent Pipeline {isRunning ? '— Executing…' : '— Complete'}
           </div>
@@ -86,11 +155,11 @@ export function Dashboard() {
         </div>
       )}
 
-      {/* ---- Full results ---- */}
+      {/* ── Full results layout ── */}
       {result && (
         <div className="space-y-6 animate-fade-in">
 
-          {/* Warnings banner */}
+          {/* Warnings */}
           {(result.warnings.length > 0 || result.synthesis.conflict_detected) && (
             <DegradedWarning
               warnings={result.warnings}
@@ -98,39 +167,37 @@ export function Dashboard() {
             />
           )}
 
-          {/* Row 1: Market + Profile */}
+          {/* Row 1: Market chart + Profile (2/3 + 1/3) */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2">
               <MarketCard data={result.market_data} />
             </div>
-            <div>
-              <ProfileCard
-                profile={result.investor_profile}
-                portfolio={result.portfolio}
-                watchlist={result.watchlist}
-                analyzedSymbol={result.symbol}
-              />
-            </div>
+            <ProfileCard
+              profile={result.investor_profile}
+              portfolio={result.portfolio}
+              watchlist={result.watchlist}
+              analyzedSymbol={result.symbol}
+            />
           </div>
 
-          {/* Row 2: Agent detail cards */}
+          {/* Row 2: Three agent cards side-by-side */}
           <div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+            <div className="flex items-center gap-2 section-label mb-3">
               <BarChart2 className="w-3.5 h-3.5 text-brand-400" />
               Agent Analysis Details
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {result.agent_results.map(agent => (
-                <AgentCard key={agent.agent} agent={agent} defaultExpanded={true} />
+                <AgentCard key={agent.agent} agent={agent} defaultExpanded />
               ))}
             </div>
           </div>
 
-          {/* Row 3: Synthesis + Intelligence */}
+          {/* Row 3: Synthesis + Intelligence (equal halves) */}
           <div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+            <div className="flex items-center gap-2 section-label mb-3">
               <Brain className="w-3.5 h-3.5 text-brand-400" />
-              Synthesis & Personalized Intelligence
+              Synthesis &amp; Personalized Intelligence
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <SynthesisCard synthesis={result.synthesis} />
@@ -142,44 +209,21 @@ export function Dashboard() {
           </div>
 
           {/* Row 4: Metrics */}
-          <div>
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Performance Metrics</div>
-            <MetricsPanel metrics={result.metrics} />
-          </div>
+          <MetricsPanel metrics={result.metrics} />
 
           {/* Row 5: Decision trace */}
           <DecisionTrace steps={result.decision_trace} />
 
           {/* Footer */}
-          <div className="text-center text-xs text-slate-700 py-4 border-t border-white/5">
+          <div className="text-center text-xs text-slate-700 py-4 border-t border-surface-500">
             FinSight AI · HackVerse Sprint 1 · PS-01 Multi-Agent Financial Intelligence
-            · Analysis ID: <span className="font-mono">{result.analysis_id}</span>
+            · <span className="font-mono">{result.analysis_id}</span>
           </div>
         </div>
       )}
 
-      {/* ---- Idle state ---- */}
-      {state === 'idle' && (
-        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1.9fr] gap-10 pt-8 animate-fade-in">
-          <section className="p-4 sm:p-8 flex flex-col justify-center min-h-[280px]">
-            <div className="relative">
-              <div className="eyebrow mb-4">Thoughtful investing</div>
-              <h2 className="text-3xl sm:text-4xl font-normal tracking-tight text-slate-800 max-w-sm">Clarity for your next investment decision.</h2>
-              <p className="text-base leading-7 text-slate-500 mt-5 max-w-md">Three independent views. A transparent synthesis. Advice shaped around the investor, not just the ticker.</p>
-            </div>
-            <div className="relative flex items-center gap-2 text-sm text-brand-500 mt-8"><span>Start a research run</span><ArrowUpRight className="w-4 h-4" /></div>
-          </section>
-          <section className="card p-6 sm:p-7">
-            <div className="flex items-center justify-between mb-5"><div><div className="eyebrow mb-1">What is checked</div><h2 className="panel-heading">Independent signals, one decision</h2></div><span className="text-xs text-slate-500 font-mono">01 — 04</span></div>
-            <div className="grid sm:grid-cols-3 gap-3">
-              <div className="rounded border border-[#e9e9e9] bg-white p-4"><SearchCheck className="w-5 h-5 text-brand-500 mb-5" /><div className="text-sm font-medium text-slate-800">Technical</div><p className="text-xs text-slate-500 leading-5 mt-1">Price action, momentum and volume.</p></div>
-              <div className="rounded border border-[#e9e9e9] bg-white p-4"><FileSearch className="w-5 h-5 text-brand-500 mb-5" /><div className="text-sm font-medium text-slate-800">Fundamental</div><p className="text-xs text-slate-500 leading-5 mt-1">Earnings context and source documents.</p></div>
-              <div className="rounded border border-[#e9e9e9] bg-white p-4"><Radio className="w-5 h-5 text-brand-500 mb-5" /><div className="text-sm font-medium text-slate-800">Sentiment</div><p className="text-xs text-slate-500 leading-5 mt-1">News pulse and market mood.</p></div>
-            </div>
-            <div className="mt-4 pt-4 border-t border-white/5 flex flex-wrap gap-x-6 gap-y-2 text-xs text-slate-500"><span><span className="text-slate-300">Synthesis</span> resolves disagreement</span><span><span className="text-slate-300">Personalization</span> comes last</span></div>
-          </section>
-        </div>
-      )}
+      {/* Idle hero */}
+      {state === 'idle' && <IdleHero />}
     </div>
   )
 }

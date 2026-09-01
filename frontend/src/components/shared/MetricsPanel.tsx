@@ -1,61 +1,64 @@
 import type { AnalysisMetric } from '../../types/api'
+import { Timer } from 'lucide-react'
 
-interface MetricsPanelProps {
-  metrics: AnalysisMetric[]
-}
+interface MetricsPanelProps { metrics: AnalysisMetric[] }
 
-function formatValue(metric: AnalysisMetric): string {
-  if (metric.unit === 'ratio') return `${(metric.value * 100).toFixed(1)}%`
-  if (metric.unit === 'ms') return `${metric.value.toFixed(1)}ms`
-  if (metric.unit === 'score') {
-    const v = metric.value
-    return `${v > 0 ? '+' : ''}${v.toFixed(3)}`
-  }
-  if (metric.unit === 'count') return `${Math.round(metric.value)}`
-  return metric.value.toFixed(3)
-}
+function MetricTile({ metric }: { metric: AnalysisMetric }) {
+  const isLatency = metric.unit === 'ms'
+  const isRatio   = metric.unit === 'ratio' || metric.unit === '%' || metric.unit === 'score'
+  const formatted = isLatency
+    ? `${metric.value.toFixed(1)} ms`
+    : isRatio
+      ? `${(metric.value * 100).toFixed(1)}%`
+      : metric.value.toFixed(2)
 
-function getMetricColor(metric: AnalysisMetric): string {
-  if (metric.unit === 'ratio') {
-    if (metric.value >= 0.75) return 'text-bullish'
-    if (metric.value >= 0.50) return 'text-yellow-400'
-    return 'text-bearish'
-  }
-  if (metric.unit === 'score') {
-    if (metric.value > 0.1) return 'text-bullish'
-    if (metric.value < -0.1) return 'text-bearish'
-    return 'text-slate-300'
-  }
-  return 'text-slate-200'
-}
+  const label = metric.name
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase())
 
-const METRIC_LABELS: Record<string, string> = {
-  data_completeness: 'Data Completeness',
-  synthesis_confidence: 'Synthesis Confidence',
-  agreement_score: 'Agent Agreement',
-  market_score: 'Market Score',
-  technical_latency: 'Technical Latency',
-  fundamental_latency: 'Fundamental Latency',
-  sentiment_latency: 'Sentiment Latency',
-  total_evidence_pieces: 'Evidence Pieces',
+  const color = isLatency
+    ? metric.value < 50 ? '#00d09c' : metric.value < 200 ? '#f59e0b' : '#ff5252'
+    : '#3b82f6'
+
+  return (
+    <div className="bg-slate-50 dark:bg-surface-600 border border-slate-200 dark:border-surface-400 rounded-lg px-3 py-2.5 space-y-1">
+      <div className="text-[10px] text-slate-500 uppercase tracking-wider leading-snug">{label}</div>
+      <div className="font-mono font-bold text-sm" style={{ color }}>{formatted}</div>
+      {!metric.measured && (
+        <div className="text-[10px] text-amber-500">estimated</div>
+      )}
+    </div>
+  )
 }
 
 export function MetricsPanel({ metrics }: MetricsPanelProps) {
+  const latencyMetrics = metrics.filter(m => m.unit === 'ms')
+  const otherMetrics   = metrics.filter(m => m.unit !== 'ms')
+
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      {metrics.map(metric => (
-        <div key={metric.name} className="bg-surface-600 border border-white/5 rounded-lg p-3">
-          <div className="text-xs text-slate-500 mb-1 truncate">
-            {METRIC_LABELS[metric.name] ?? metric.name.replace(/_/g, ' ')}
+    <div className="card p-4 space-y-3 animate-fade-in">
+      <div className="flex items-center gap-2">
+        <Timer className="w-3.5 h-3.5 text-brand-400" />
+        <h3 className="section-label">Performance Metrics</h3>
+      </div>
+
+      {latencyMetrics.length > 0 && (
+        <div>
+          <div className="text-[10px] text-slate-600 mb-2 uppercase tracking-wider">Latency</div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {latencyMetrics.map(m => <MetricTile key={m.name} metric={m} />)}
           </div>
-          <div className={`text-lg font-mono font-bold ${getMetricColor(metric)}`}>
-            {formatValue(metric)}
-          </div>
-          {metric.measured && (
-            <div className="text-xs text-slate-600 mt-0.5">measured</div>
-          )}
         </div>
-      ))}
+      )}
+
+      {otherMetrics.length > 0 && (
+        <div>
+          <div className="text-[10px] text-slate-600 mb-2 uppercase tracking-wider">Quality</div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {otherMetrics.map(m => <MetricTile key={m.name} metric={m} />)}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

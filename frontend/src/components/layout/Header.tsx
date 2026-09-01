@@ -1,81 +1,93 @@
-import { useState } from 'react'
-import { TrendingUp, Menu, X } from 'lucide-react'
-import { isMockMode } from '../../services/api'
-import { MockModeBanner } from '../shared/DegradedWarning'
+import { useEffect, useState } from 'react'
+import { Activity, Sun, Moon } from 'lucide-react'
+import { useTheme } from '../../hooks/useTheme'
 
-export type AppView = 'research' | 'portfolio' | 'guide'
-
-interface HeaderProps {
-  activeView: AppView
-  onNavigate: (view: AppView) => void
+function LiveClock() {
+  const [time, setTime] = useState(new Date())
+  useEffect(() => {
+    const id = setInterval(() => setTime(new Date()), 1000)
+    return () => clearInterval(id)
+  }, [])
+  return (
+    <span className="font-mono text-xs" style={{ color: 'var(--text-muted)' }}>
+      {time.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} IST
+    </span>
+  )
 }
 
-const navigationItems: Array<{ label: string; view: AppView }> = [
-  { label: 'Research', view: 'research' },
-  { label: 'Portfolio view', view: 'portfolio' },
-  { label: 'How it works', view: 'guide' },
-]
+function BackendStatus() {
+  const [ok, setOk] = useState<boolean | null>(null)
+  useEffect(() => {
+    fetch('/health')
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(() => setOk(true))
+      .catch(() => setOk(false))
+  }, [])
+  return (
+    <div className="flex items-center gap-1.5 text-[11px]">
+      {ok === null
+        ? <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-pulse" />
+        : ok
+          ? <><span className="w-1.5 h-1.5 rounded-full bg-green-500" /><span className="text-green-600 dark:text-emerald-400 hidden sm:inline">API Connected</span></>
+          : <><span className="w-1.5 h-1.5 rounded-full bg-red-500" /><span className="text-red-500 hidden sm:inline">API Offline</span></>
+      }
+    </div>
+  )
+}
 
-export function Header({ activeView, onNavigate }: HeaderProps) {
-  const [mobileOpen, setMobileOpen] = useState(false)
-
-  const selectView = (view: AppView) => {
-    setMobileOpen(false)
-    onNavigate(view)
-  }
+export function Header() {
+  const { isDark, toggle } = useTheme()
 
   return (
-    <header className="relative border-b border-[#eeeeee] bg-white sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-5 sm:px-6 h-16 flex items-center justify-between gap-4">
-        {/* Brand */}
-        <div className="flex items-center gap-3">
-          <div className="w-7 h-7 bg-brand-500 rounded-sm flex items-center justify-center flex-shrink-0">
-            <TrendingUp className="w-5 h-5 text-white" />
+    <header
+      className="sticky top-0 z-50 backdrop-blur-md border-b"
+      style={{
+        backgroundColor: isDark ? 'rgba(10,14,23,0.85)' : 'rgba(255,255,255,0.85)',
+        borderColor: 'var(--border)',
+      }}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+
+        {/* Logo */}
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+               style={{ background: 'linear-gradient(135deg, #2563eb, #6366f1)' }}>
+            <Activity className="w-4 h-4 text-white" />
           </div>
-          <div>
-            <h1 className="text-lg font-medium text-slate-800 tracking-tight leading-none">FinSight</h1>
+          <div className="flex items-baseline gap-1">
+            <span className="text-sm font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>FinSight</span>
+            <span className="text-xs font-semibold" style={{ color: 'var(--brand)' }}>AI</span>
           </div>
+          <span className="hidden sm:inline text-[10px] border rounded px-1.5 py-0.5 font-mono"
+                style={{ color: 'var(--text-muted)', borderColor: 'var(--border)' }}>
+            SPRINT 1
+          </span>
         </div>
 
-        {/* Center: pipeline legend */}
-        <nav aria-label="Primary navigation" className="hidden md:flex items-center gap-1">
-          {navigationItems.map(item => (
-            <button
-              key={item.view}
-              type="button"
-              onClick={() => selectView(item.view)}
-              className={`px-4 py-2 text-sm border-b-2 transition-colors ${
-                activeView === item.view
-                  ? 'border-brand-500 text-brand-500'
-                  : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-200'
-              }`}
-              aria-current={activeView === item.view ? 'page' : undefined}
-            >
-              {item.label}
-            </button>
-          ))}
-        </nav>
+        {/* Centre tagline */}
+        <div className="hidden md:block text-[11px] tracking-wide" style={{ color: 'var(--text-muted)' }}>
+          Multi-Agent Financial Intelligence · PS-01 · HackVerse
+        </div>
 
-        {/* Right: status */}
-        <div className="flex items-center gap-3">
-          <MockModeBanner visible={isMockMode} />
-          <div className="hidden sm:block text-xs text-slate-500">Market intelligence</div>
-          <button type="button" onClick={() => setMobileOpen(open => !open)} className="md:hidden p-1 text-slate-600" aria-label="Open navigation" aria-expanded={mobileOpen}>
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        {/* Right — status + clock + toggle */}
+        <div className="flex items-center gap-4">
+          <BackendStatus />
+          <LiveClock />
+
+          {/* Theme toggle */}
+          <button
+            onClick={toggle}
+            className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+            style={{ backgroundColor: 'var(--bg-muted)', border: '1px solid var(--border)' }}
+            title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {isDark
+              ? <Sun  className="w-4 h-4 text-amber-400" />
+              : <Moon className="w-4 h-4 text-blue-500" />
+            }
           </button>
         </div>
       </div>
-      {mobileOpen && (
-        <nav aria-label="Mobile navigation" className="md:hidden border-t border-[#eeeeee] bg-white px-5 py-3 shadow-sm">
-          <div className="max-w-6xl mx-auto grid gap-1">
-            {navigationItems.map(item => (
-              <button key={item.view} type="button" onClick={() => selectView(item.view)} className={`rounded px-3 py-2.5 text-left text-sm ${activeView === item.view ? 'bg-brand-50 text-brand-600' : 'text-slate-600 hover:bg-surface-600'}`} aria-current={activeView === item.view ? 'page' : undefined}>
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </nav>
-      )}
     </header>
   )
 }
