@@ -27,7 +27,7 @@ class Settings:
     supabase_service_role_key: str = _env("SUPABASE_SERVICE_ROLE_KEY")
     supabase_secret_key: str = _env("SUPABASE_SECRET_KEY")
     llm_api_key: str = _env("LLM_API_KEY") or _env("GEMINI_API_KEY")
-    gemini_model: str = _env("GEMINI_MODEL", "gemini-3.7-flash")
+    gemini_model: str = _env("GEMINI_MODEL", "gemini-2.5-flash")
     gemini_grounding: bool = _env_bool("GEMINI_GROUNDING", True)
     gemini_timeout_seconds: float = float(_env("GEMINI_TIMEOUT_SECONDS", "20"))
     data_mode: str = _env("DATA_MODE", "hybrid").lower()

@@ -99,6 +99,24 @@ def test_yahoo_adapter_preserves_explicit_exchange_symbols() -> None:
     assert service.provider_symbol("USDINR=X") == "USDINR=X"
 
 
+@pytest.mark.parametrize(
+    ("symbol", "provider_symbol"),
+    [
+        ("NIFTY 50", "^NSEI"),
+        ("NIFTY50", "^NSEI"),
+        ("SENSEX", "^BSESN"),
+        ("NIFTYSENSEX", "^BSESN"),
+        ("BANK NIFTY", "^NSEBANK"),
+    ],
+)
+def test_yahoo_adapter_maps_common_indian_index_aliases(
+    symbol: str, provider_symbol: str
+) -> None:
+    service = YahooFinanceDataService()
+
+    assert service.provider_symbol(symbol) == provider_symbol
+
+
 def _market(*, source: str, synthetic: bool) -> MarketData:
     observed = datetime(2026, 6, 30, tzinfo=UTC)
     return MarketData(

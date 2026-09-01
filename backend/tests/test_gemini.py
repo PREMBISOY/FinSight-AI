@@ -102,7 +102,9 @@ async def test_gemini_uses_search_grounding_and_profile_context() -> None:
     assert str(result.citations[0].url) == "https://example.com/filing"
     assert captured["headers"]["x-goog-api-key"] == "test-key"
     assert captured["body"]["tools"] == [{"google_search": {}}]
-    assert "responseFormat" in captured["body"]["generationConfig"]
+    assert captured["body"]["generationConfig"]["responseMimeType"] == "application/json"
+    assert "responseSchema" in captured["body"]["generationConfig"]
+    assert "responseFormat" not in captured["body"]["generationConfig"]
     prompt = captured["body"]["contents"][0]["parts"][0]["text"]
     assert "conservative" in prompt
     assert "25.0" in prompt
@@ -116,4 +118,46 @@ async def test_gemini_failure_does_not_fail_analysis_stage() -> None:
     result = await service.generate(**await _inputs())
     assert result.status == "error"
     assert result.summary == ""
-    assert "HTTPStatusError" in (result.limitation or "")
+    assert "quota is exhausted" in (result.limitation or "")
+
+
+async def test_gemini_25_preserves_a_prose_answer_when_json_is_imperfect() -> None:
+    captured: dict = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["body"] = json.loads(request.content)
+        return httpx.Response(
+            200,
+            json={
+                "candidates": [
+                    {
+                        "content": {
+                            "parts": [
+                                {
+                                    "text": (
+                                        "The evidence is moderately positive, but the investor's "
+                                        "existing concentration supports holding rather than adding."
+                                    )
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+        )
+
+    service = GeminiInsightService(
+        api_key="test-key",
+        model="gemini-2.5-flash",
+        transport=httpx.MockTransport(handler),
+    )
+    result = await service.generate(**await _inputs())
+
+    assert result.status == "success"
+    assert "moderately positive" in result.summary
+    assert result.profile_specific_guidance == []
+    assert "returned prose" in (result.limitation or "")
+    assert captured["body"]["generationConfig"]["thinkingConfig"] == {
+        "thinkingBudget": 0
+    }
+    assert captured["body"]["tools"] == [{"google_search": {}}]

@@ -6,6 +6,7 @@ import { AgentStatusRow, AgentCard } from '../components/analysis/AgentCard'
 import { MarketCard } from '../components/market/MarketCard'
 import { SynthesisCard } from '../components/synthesis/SynthesisCard'
 import { IntelligenceCard } from '../components/intelligence/IntelligenceCard'
+import { GeminiInsightCard } from '../components/intelligence/GeminiInsightCard'
 import { DecisionTrace } from '../components/trace/DecisionTrace'
 import { MetricsPanel } from '../components/shared/MetricsPanel'
 import { DegradedWarning } from '../components/shared/DegradedWarning'
@@ -105,13 +106,15 @@ function IdleHero() {
 export function Dashboard() {
   const [userId,   setUserId]   = useState('conservative-demo')
   const [symbol,   setSymbol]   = useState('RELIANCE')
+  const [query, setQuery] = useState('What do the latest financial evidence and outlook imply?')
   const [scenario, setScenario] = useState<DemoScenario>('normal')
   const { state, result, error, run, reset } = useAnalysis()
 
   const handleUserChange     = (id: string)          => { setUserId(id);       reset() }
   const handleScenarioChange = (s: DemoScenario)     => { setScenario(s);      reset() }
   const handleSymbolChange   = (s: string)           => { setSymbol(s);        reset() }
-  const handleAnalyze        = ()                    => run({ user_id: userId, symbol, scenario })
+  const handleQueryChange    = (value: string)       => { setQuery(value);      reset() }
+  const handleAnalyze        = ()                    => run({ user_id: userId, symbol, query, scenario })
 
   const isRunning = state === 'running'
 
@@ -123,9 +126,11 @@ export function Dashboard() {
         selectedUserId={userId}
         selectedScenario={scenario}
         symbol={symbol}
+        query={query}
         onUserChange={handleUserChange}
         onScenarioChange={handleScenarioChange}
         onSymbolChange={handleSymbolChange}
+        onQueryChange={handleQueryChange}
         onAnalyze={handleAnalyze}
         isRunning={isRunning}
       />
@@ -166,6 +171,9 @@ export function Dashboard() {
               conflictDetected={result.synthesis.conflict_detected}
             />
           )}
+
+          {/* Direct Gemini answer tied to the submitted question */}
+          <GeminiInsightCard insight={result.ai_insight} question={result.query} />
 
           {/* Row 1: Market chart + Profile (2/3 + 1/3) */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

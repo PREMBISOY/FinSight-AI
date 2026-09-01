@@ -32,6 +32,8 @@ Unknown users return HTTP `404` with a concise `detail` message.
 
 `scenario` is one of `normal`, `degraded_sentiment`, or `conflict` and exists to make Sprint 1 judging deterministic. Production inputs would determine degradation naturally.
 
+The symbol is normalized before validation. Common index names are accepted: `NIFTY 50`, `NIFTY50`, and `NIFTY` resolve to the NIFTY 50 index; `SENSEX` and `BSE SENSEX` resolve to the BSE SENSEX; `BANK NIFTY` resolves to NIFTY Bank. Because indices do not have corporate financial statements, their fundamental agent may be explicitly unavailable while technical, news, synthesis, personalization, and Gemini still complete.
+
 The `200` response contains:
 
 - immutable market data and investor context
@@ -47,6 +49,8 @@ The `200` response contains:
 `market_data.source` identifies Yahoo, a fresh cache, a stale cache, or the curated fallback, while `market_data.synthetic` is always `true` for fixture data. News and evidence carry their own source names, URLs, timestamps, and synthetic labels.
 
 Gemini is an explanation and current-context layer. It cannot change specialist classifications, deterministic synthesis scores, or the profile-specific recommendation. When Gemini is missing or fails, the deterministic analysis still returns and `ai_insight.status` is `unavailable` or `error`.
+
+The frontend displays `query` beside `ai_insight.summary` in a dedicated “Answer to your research question” panel, including model, grounding citations, profile considerations, risks, and any limitation.
 
 Validation errors return HTTP `422`; missing users or symbols return `404`; an unexpected pipeline failure returns `500` without leaking secrets.
 

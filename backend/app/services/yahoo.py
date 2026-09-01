@@ -9,6 +9,7 @@ from typing import Any
 
 import pandas as pd
 
+from backend.app.core.symbols import yahoo_symbol
 from backend.app.schemas import DocumentChunk, MarketData, NewsItem, PricePoint
 
 from .data import DataNotFoundError
@@ -29,10 +30,7 @@ class YahooFinanceDataService:
         self._ticker_factory = ticker_factory
 
     def provider_symbol(self, symbol: str) -> str:
-        normalized = symbol.strip().upper()
-        if "." in normalized or normalized.startswith("^") or "=" in normalized:
-            return normalized
-        return f"{normalized}{self.exchange_suffix}"
+        return yahoo_symbol(symbol, self.exchange_suffix)
 
     def _ticker(self, symbol: str) -> Any:
         provider_symbol = self.provider_symbol(symbol)

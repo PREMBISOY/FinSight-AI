@@ -16,6 +16,7 @@ import type {
   MarketData,
   Portfolio,
   InvestorProfile,
+  AIInsight,
 } from '../types/api'
 
 // ---- Shared market data fixture ----
@@ -397,6 +398,27 @@ function makeIntelligence(
   }
 }
 
+function makeMockAIInsight(
+  userId: string,
+  intelligence: PersonalizedIntelligence,
+): AIInsight {
+  const profileLabel = userId === 'conservative-demo'
+    ? 'conservative long-horizon'
+    : 'aggressive short-horizon'
+  return {
+    status: 'success',
+    provider: 'mock',
+    model: 'mock-only',
+    grounded: false,
+    summary: `Demo-only answer for the ${profileLabel} profile. The deterministic recommendation is ${intelligence.recommendation}.`,
+    profile_specific_guidance: intelligence.reasons,
+    key_risks: ['Mock mode does not contain current web research or live market data.'],
+    citations: [],
+    latency_ms: 0,
+    limitation: 'Explicit frontend mock mode is active; Gemini was not called.',
+  }
+}
+
 // ---- Decision traces ----
 
 function makeDecisionTrace(
@@ -540,6 +562,7 @@ export async function mockAnalyze(request: AnalyzeRequest): Promise<AnalysisResp
   }
 
   const intelligence = makeIntelligence(userId, synthesis.outlook, synthesis)
+  const aiInsight = makeMockAIInsight(userId, intelligence)
   const decisionTrace = makeDecisionTrace(agents, synthesis, intelligence)
   const metrics = makeMetrics(agents, synthesis)
 
@@ -547,6 +570,8 @@ export async function mockAnalyze(request: AnalyzeRequest): Promise<AnalysisResp
     analysis_id: `mock-${scenario}-${userId}-${Date.now()}`,
     created_at: new Date().toISOString(),
     symbol: request.symbol.toUpperCase(),
+    query: request.query ?? 'What do the latest financial evidence and outlook imply?',
+    scenario,
     market_data: RELIANCE_MARKET_DATA,
     investor_profile: userCtx.profile,
     portfolio: userCtx.portfolio,
@@ -554,6 +579,7 @@ export async function mockAnalyze(request: AnalyzeRequest): Promise<AnalysisResp
     agent_results: agents,
     synthesis,
     intelligence,
+    ai_insight: aiInsight,
     decision_trace: decisionTrace,
     metrics,
     warnings,

@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { User, BarChart2, FileSearch, Radio, Loader2, ChevronDown, Search, Zap } from 'lucide-react'
 import type { InvestorProfile, Portfolio, DemoScenario } from '../../types/api'
 
@@ -19,24 +18,23 @@ interface ProfileSelectorProps {
   selectedUserId: string
   selectedScenario: DemoScenario
   symbol: string
+  query: string
   onUserChange: (id: string) => void
   onScenarioChange: (s: DemoScenario) => void
   onSymbolChange: (s: string) => void
+  onQueryChange: (query: string) => void
   onAnalyze: () => void
   isRunning: boolean
 }
 
 export function ProfileSelector({
-  selectedUserId, selectedScenario, symbol,
-  onUserChange, onScenarioChange, onSymbolChange,
+  selectedUserId, selectedScenario, symbol, query,
+  onUserChange, onScenarioChange, onSymbolChange, onQueryChange,
   onAnalyze, isRunning,
 }: ProfileSelectorProps) {
-  const [symInput, setSymInput] = useState(symbol)
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSymbolChange(symInput.trim().toUpperCase() || 'RELIANCE')
-    onAnalyze()
+    if (symbol.trim() && query.trim()) onAnalyze()
   }
 
   return (
@@ -74,9 +72,9 @@ export function ProfileSelector({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
             <input
               type="text"
-              value={symInput}
-              onChange={e => setSymInput(e.target.value.toUpperCase())}
-              placeholder="RELIANCE"
+              value={symbol}
+              onChange={e => onSymbolChange(e.target.value.toUpperCase())}
+              placeholder="RELIANCE, NIFTY 50, SENSEX"
               className="finsight-input pl-8 pr-3 py-2 font-mono"
             />
           </div>
@@ -85,7 +83,7 @@ export function ProfileSelector({
         {/* Analyze button */}
         <button
           type="submit"
-          disabled={isRunning}
+          disabled={isRunning || !symbol.trim() || !query.trim()}
           className="btn-primary flex-shrink-0"
         >
           {isRunning
@@ -95,7 +93,21 @@ export function ProfileSelector({
         </button>
       </div>
 
-      {/* Row 2: Scenario toggle */}
+      {/* Row 2: Research question */}
+      <div className="space-y-1">
+        <label className="section-label" htmlFor="research-question">Research Question</label>
+        <textarea
+          id="research-question"
+          value={query}
+          onChange={e => onQueryChange(e.target.value)}
+          maxLength={1000}
+          rows={2}
+          className="finsight-input px-3 py-2 resize-y"
+          placeholder="What do the latest financial evidence and outlook imply?"
+        />
+      </div>
+
+      {/* Row 3: Scenario toggle */}
       <div className="flex flex-wrap items-center gap-2">
         <span className="section-label">Scenario:</span>
         {SCENARIOS.map(s => (

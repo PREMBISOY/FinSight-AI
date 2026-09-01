@@ -6,6 +6,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field, HttpUrl, field_validator
 
+from backend.app.core.symbols import canonical_symbol
+
 from .agent import AgentOutput
 from .enums import MarketOutlook, Recommendation, RiskLevel
 from .user import InvestorProfile, Portfolio
@@ -67,7 +69,7 @@ class AnalyzeRequest(BaseModel):
     symbol: str = Field(
         min_length=1,
         max_length=20,
-        pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]*$",
+        pattern=r"^[A-Za-z0-9][A-Za-z0-9.&_-]*$",
     )
     query: str = Field(
         default="What do the latest financial evidence and outlook imply?",
@@ -76,10 +78,10 @@ class AnalyzeRequest(BaseModel):
     )
     scenario: DemoScenario = DemoScenario.NORMAL
 
-    @field_validator("symbol")
+    @field_validator("symbol", mode="before")
     @classmethod
-    def normalize_symbol(cls, value: str) -> str:
-        return value.strip().upper()
+    def normalize_symbol(cls, value: object) -> object:
+        return canonical_symbol(value) if isinstance(value, str) else value
 
     @field_validator("user_id", "query")
     @classmethod

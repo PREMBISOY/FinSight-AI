@@ -50,7 +50,7 @@ class GeminiInsightService:
     def __init__(
         self,
         api_key: str,
-        model: str = "gemini-3.7-flash",
+        model: str = "gemini-2.5-flash",
         *,
         grounding: bool = True,
         timeout_seconds: float = 20.0,
@@ -108,6 +108,22 @@ class GeminiInsightService:
             raise ValueError("Gemini response was not a JSON object")
         return decoded
 
+    @staticmethod
+    def _string_list(value: Any) -> list[str]:
+        if isinstance(value, str):
+            parts = re.split(r"\n+|;\s*", value)
+            return [part.strip(" -•\t") for part in parts if part.strip(" -•\t")][:6]
+        if isinstance(value, list):
+            return [str(item).strip() for item in value if str(item).strip()][:6]
+        return []
+
+    @staticmethod
+    def _plain_response(text: str) -> str:
+        stripped = text.strip()
+        if stripped.startswith("```"):
+            stripped = re.sub(r"^```(?:json)?\s*|\s*```$", "", stripped, flags=re.IGNORECASE)
+        return stripped
+
     async def generate(
         self,
         *,
@@ -145,9 +161,10 @@ class GeminiInsightService:
             "Use Google Search for recent, verifiable context when available. The structured "
             "classification and recommendation in the input are immutable: do not replace, "
             "upgrade, downgrade, or contradict them. Do not invent prices, filings, dates, or "
-            "portfolio facts. Clearly distinguish current web context from the supplied curated "
-            "market observation. Tailor considerations to this investor's risk tolerance, "
-            "horizon, exposure, and position limit. Return only the requested JSON fields.\n\n"
+            "portfolio facts. Clearly distinguish current web context from the supplied market "
+            "observation. Tailor considerations to this investor's risk tolerance, "
+            "horizon, exposure, and position limit. Return exactly one JSON object using the exact "
+            "keys summary, profile_specific_guidance, and key_risks; do not rename those keys.\n\n"
             f"INPUT_JSON:\n{json.dumps(context, ensure_ascii=False, separators=(',', ':'))}"
         )
         body: dict[str, Any] = {
@@ -163,8 +180,10 @@ class GeminiInsightService:
                 ]
             },
             "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-            "generationConfig": {"temperature": 0.2, "maxOutputTokens": 1200},
+            "generationConfig": {"temperature": 0.2, "maxOutputTokens": 2048},
         }
+        if self.model.startswith("gemini-2.5"):
+            body["generationConfig"]["thinkingConfig"] = {"thinkingBudget": 0}
         response_schema = {
             "type": "object",
             "properties": {
@@ -178,9 +197,11 @@ class GeminiInsightService:
             "required": ["summary", "profile_specific_guidance", "key_risks"],
         }
         if self.model.startswith("gemini-3"):
-            body["generationConfig"]["responseFormat"] = {
-                "text": {"mimeType": "application/json", "schema": response_schema}
-            }
+            # generateContent uses the legacy structured-output fields. The
+            # newer Interactions API uses top-level response_format instead.
+            body["generationConfig"].update(
+                {"responseMimeType": "application/json", "responseSchema": response_schema}
+            )
         else:
             # Gemini 2.x cannot combine Search grounding with constrained
             # structured output. The prompt still requests JSON and the parser
@@ -208,28 +229,79 @@ class GeminiInsightService:
                 )
                 response.raise_for_status()
                 payload = response.json()
-            generated = self._decode_generated(self._response_text(payload))
+            response_text = self._response_text(payload)
             citations = self._citations(payload)
+            structured = True
+            try:
+                generated = self._decode_generated(response_text)
+                summary = str(
+                    generated.get("summary")
+                    or generated.get("research_summary")
+                    or generated.get("answer")
+                    or ""
+                ).strip()
+                guidance = self._string_list(
+                    generated.get("profile_specific_guidance")
+                    or generated.get("profile_guidance")
+                    or generated.get("investor_considerations")
+                )
+                risks = self._string_list(generated.get("key_risks") or generated.get("risks"))
+                if not summary:
+                    raise ValueError("Gemini JSON did not contain an answer")
+            except (json.JSONDecodeError, ValueError):
+                structured = False
+                summary = self._plain_response(response_text)
+                guidance = []
+                risks = []
+                if not summary:
+                    raise ValueError("Gemini returned no usable answer")
+
+            limitations: list[str] = []
+            if not structured:
+                limitations.append("Gemini returned prose instead of the requested structured fields.")
+            if not citations and self.grounding:
+                limitations.append("Gemini did not return Google Search grounding citations.")
             return AIInsight(
                 status="success",
                 model=self.model,
                 grounded=bool(citations),
-                summary=str(generated["summary"]).strip(),
-                profile_specific_guidance=[
-                    str(item).strip()
-                    for item in generated["profile_specific_guidance"]
-                    if str(item).strip()
-                ][:6],
-                key_risks=[
-                    str(item).strip() for item in generated["key_risks"] if str(item).strip()
-                ][:6],
+                summary=summary,
+                profile_specific_guidance=guidance,
+                key_risks=risks,
                 citations=citations,
                 latency_ms=round((perf_counter() - started) * 1000, 3),
-                limitation=(
-                    None
-                    if citations or not self.grounding
-                    else "Gemini completed without returning Google Search grounding citations."
-                ),
+                limitation=" ".join(limitations) or None,
+            )
+        except httpx.HTTPStatusError as exc:
+            status_code = exc.response.status_code
+            if status_code == 429:
+                limitation = (
+                    "Gemini quota is exhausted for the configured model; the deterministic "
+                    "analysis remains available."
+                )
+            elif status_code in {401, 403}:
+                limitation = (
+                    "Gemini rejected the configured API key or its permissions; the deterministic "
+                    "analysis remains available."
+                )
+            elif status_code == 400:
+                limitation = (
+                    "Gemini rejected the request configuration; the deterministic analysis "
+                    "remains available."
+                )
+            else:
+                limitation = (
+                    f"Gemini returned HTTP {status_code}; the deterministic analysis remains available."
+                )
+            logger.warning(
+                "gemini_insight_failed",
+                extra={"error_type": type(exc).__name__, "status_code": status_code},
+            )
+            return AIInsight(
+                status="error",
+                model=self.model,
+                latency_ms=round((perf_counter() - started) * 1000, 3),
+                limitation=limitation,
             )
         except Exception as exc:  # external enrichment must not erase deterministic output
             logger.warning("gemini_insight_failed", extra={"error_type": type(exc).__name__})
@@ -237,7 +309,10 @@ class GeminiInsightService:
                 status="error",
                 model=self.model,
                 latency_ms=round((perf_counter() - started) * 1000, 3),
-                limitation=f"Gemini enrichment failed safely: {type(exc).__name__}.",
+                limitation=(
+                    f"Gemini response processing failed safely: {type(exc).__name__}. "
+                    "The deterministic analysis remains available."
+                ),
             )
 
 

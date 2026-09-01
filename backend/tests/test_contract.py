@@ -51,3 +51,22 @@ def test_analysis_request_rejects_unsafe_or_blank_inputs(field: str, value: str)
     payload = {"user_id": "conservative-demo", "symbol": "RELIANCE", field: value}
     with pytest.raises(ValidationError):
         AnalyzeRequest.model_validate(payload)
+
+
+@pytest.mark.parametrize(
+    ("submitted", "canonical"),
+    [
+        ("NIFTY 50", "NIFTY50"),
+        ("nifty", "NIFTY50"),
+        ("BSE Sensex", "SENSEX"),
+        ("NIFTYSENSEX", "SENSEX"),
+        ("Bank Nifty", "BANKNIFTY"),
+        ("M&M", "M&M"),
+    ],
+)
+def test_analysis_request_normalizes_human_friendly_symbols(
+    submitted: str, canonical: str
+) -> None:
+    request = AnalyzeRequest(user_id="conservative-demo", symbol=submitted)
+
+    assert request.symbol == canonical
