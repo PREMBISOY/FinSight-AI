@@ -61,12 +61,18 @@ class FixtureDataService:
 
 
 class HybridDataService:
-    """Live-first provider with TTL snapshots and an explicit fixture fallback."""
+    """Live provider with TTL snapshots and an optional explicit test fallback.
+
+    Production construction never supplies ``fallback``.  That guarantees a live
+    request can only return live Yahoo Finance data or a previously stored Yahoo
+    Finance snapshot; it cannot silently turn into a fixture when the upstream
+    provider is unavailable.
+    """
 
     def __init__(
         self,
         primary: DataService,
-        fallback: DataService,
+        fallback: DataService | None,
         cache: SnapshotCache,
         *,
         market_ttl_seconds: int = 900,
@@ -121,7 +127,7 @@ class HybridDataService:
         data_type: str,
         ttl_seconds: int,
         primary_loader: Callable[[str], Awaitable[T]],
-        fallback_loader: Callable[[str], Awaitable[T]],
+        fallback_loader: Callable[[str], Awaitable[T]] | None,
         serialize: Callable[[T], object],
         parse: Callable[[object, CachedSnapshot], T],
     ) -> T:
@@ -139,6 +145,7 @@ class HybridDataService:
                     },
                 )
 
+        provider_error: Exception | None = None
         try:
             result = await primary_loader(symbol)
             await self._store(
@@ -150,6 +157,7 @@ class HybridDataService:
             )
             return result
         except Exception as exc:
+            provider_error = exc
             logger.warning(
                 "live_data_provider_failed",
                 extra={
@@ -164,7 +172,11 @@ class HybridDataService:
                 return parse(snapshot.payload, snapshot)
             except Exception:
                 pass
-        return await fallback_loader(symbol)
+        if fallback_loader is not None:
+            return await fallback_loader(symbol)
+        raise DataNotFoundError(
+            f"Live {data_type} data is currently unavailable for {symbol.upper()}"
+        ) from provider_error
 
     async def market_data(self, symbol: str) -> MarketData:
         def parse(payload: object, snapshot: CachedSnapshot) -> MarketData:
@@ -179,7 +191,7 @@ class HybridDataService:
             data_type="market",
             ttl_seconds=self.market_ttl_seconds,
             primary_loader=self.primary.market_data,
-            fallback_loader=self.fallback.market_data,
+            fallback_loader=self.fallback.market_data if self.fallback else None,
             serialize=lambda value: value.model_dump(mode="json"),
             parse=parse,
         )
@@ -199,7 +211,7 @@ class HybridDataService:
             data_type="news",
             ttl_seconds=self.news_ttl_seconds,
             primary_loader=self.primary.news_items,
-            fallback_loader=self.fallback.news_items,
+            fallback_loader=self.fallback.news_items if self.fallback else None,
             serialize=lambda values: [value.model_dump(mode="json") for value in values],
             parse=parse,
         )
@@ -219,28 +231,29 @@ class HybridDataService:
             data_type="fundamentals",
             ttl_seconds=self.fundamentals_ttl_seconds,
             primary_loader=self.primary.document_chunks,
-            fallback_loader=self.fallback.document_chunks,
+            fallback_loader=self.fallback.document_chunks if self.fallback else None,
             serialize=lambda values: [value.model_dump(mode="json") for value in values],
             parse=parse,
         )
 
 
 def build_data_service(config: Settings = settings) -> DataService:
-    """Build the configured provider without importing yfinance in fixture-only runs."""
+    """Build a live-and-cached provider unless fixtures are explicitly requested."""
 
     if config.data_mode == "fixture":
         return FixtureDataService()
     if config.data_mode not in {"live", "hybrid"}:
-        raise ValueError("DATA_MODE must be one of: hybrid, live, fixture")
+        raise ValueError("DATA_MODE must be one of: live, hybrid, fixture")
 
     from .yahoo import YahooFinanceDataService
 
     live = YahooFinanceDataService(exchange_suffix=config.yahoo_exchange_suffix)
-    if config.data_mode == "live":
-        return live
+    # ``hybrid`` remains a backwards-compatible name for deployments that used
+    # the former setting.  It now combines only the live provider and its cache;
+    # fixture data is available solely through DATA_MODE=fixture.
     return HybridDataService(
         primary=live,
-        fallback=FixtureDataService(),
+        fallback=None,
         cache=build_snapshot_cache(config),
         market_ttl_seconds=config.market_cache_ttl_seconds,
         news_ttl_seconds=config.news_cache_ttl_seconds,

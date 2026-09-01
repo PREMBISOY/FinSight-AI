@@ -30,4 +30,4 @@ Select `conflict`. Show bullish technical, bearish fundamental, and neutral sent
 - Structured rules choose the decision; Gemini explains it and adds cited current context but cannot override it.
 - The system reports actual latency and risk/completeness metrics, not fabricated accuracy.
 - Supabase persistence uses a server-only secret/service-role key and protected tables.
-- Yahoo Finance supplies research-grade live inputs; stale-cache and fixture fallbacks are explicit rather than silently presented as live.
+- Yahoo Finance supplies research-grade live inputs; only real Yahoo snapshots may be reused from cache. Fixture mode is explicit and visibly labeled synthetic.

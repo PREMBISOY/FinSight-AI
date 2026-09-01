@@ -157,6 +157,7 @@ async def run_fundamental_analysis(
     # RAG retrieval
     # ------------------------------------------------------------------
     retrieved = retrieve(effective_query, documents, limit=_RETRIEVAL_LIMIT)
+    retrieved_chunks = [chunk for chunk, _ in retrieved]
 
     # ------------------------------------------------------------------
     # Tone scoring over retrieved chunks (above relevance threshold)
@@ -266,7 +267,18 @@ async def run_fundamental_analysis(
                 if backend == "embedding"
                 else "lexical-vector fallback active because sentence-transformers is not installed."
             ),
-            "Corpus is synthetic/curated and labelled; real filings would improve precision.",
+            (
+                "All retrieved documents are labeled synthetic fixtures; use live mode for "
+                "attributable public financial statements."
+                if all(chunk.synthetic for chunk in retrieved_chunks)
+                else (
+                    "Retrieved documents mix live sources and labeled synthetic fixtures; "
+                    "review each citation before relying on the conclusion."
+                    if any(chunk.synthetic for chunk in retrieved_chunks)
+                    else "Retrieved documents are attributable Yahoo Finance public financial "
+                    "statement data; verify reporting periods and source links before acting."
+                )
+            ),
             "Classification is tone-based; no DCF or quantitative model is applied.",
         ],
         metadata={
@@ -276,5 +288,7 @@ async def run_fundamental_analysis(
             "symbol": symbol,
             "chunks_retrieved": len(retrieved),
             "corpus_size": len(documents),
+            "synthetic_evidence": any(chunk.synthetic for chunk in retrieved_chunks),
+            "source_types": sorted({chunk.source_type for chunk in retrieved_chunks}),
         },
     )

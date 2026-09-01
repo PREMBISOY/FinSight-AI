@@ -233,6 +233,16 @@ def analyze_news_sentiment(
     limitations.append("Lexicon sentiment is not a substitute for a production financial classifier.")
     if all(item.synthetic for item in news_items):
         limitations.append("All evaluated news items are labeled synthetic/curated.")
+    elif any(item.synthetic for item in news_items):
+        limitations.append(
+            "Evaluated news mixes live publisher items and labeled synthetic fixtures; "
+            "review the cited sources before relying on the classification."
+        )
+    else:
+        limitations.append(
+            "Evaluated news items are attributable live publisher links returned by Yahoo Finance; "
+            "publisher coverage may still be incomplete."
+        )
 
     return SentimentAnalysisResult(
         classification=classification,

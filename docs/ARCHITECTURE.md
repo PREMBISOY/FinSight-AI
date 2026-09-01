@@ -10,7 +10,7 @@ FinSight AI acts as a miniature research desk for retail investors. Independent 
 React dashboard (Aarya-owned repository area)
       |
       v
-FastAPI API -> live Yahoo adapter -> Supabase TTL cache -> labeled fixture fallback
+FastAPI API -> live Yahoo adapter -> Supabase TTL cache -> explicit unavailable result
       |
       v
 async orchestrator
@@ -68,9 +68,9 @@ Market synthesis is immutable across users. The risk engine then derives concent
 
 ## Degraded-data handling
 
-- Live provider outage: an expired cached snapshot is preferred, then a supported local fixture is used and labeled `synthetic`.
+- Live provider outage: an expired Yahoo snapshot is preferred; if no real snapshot exists, the affected dataset is reported unavailable. Production never substitutes a fixture.
 - News or statement outage: only the affected agent degrades; valid price analysis continues.
-- Missing input: agent returns `unavailable`, `UNKNOWN`, zero confidence, and a limitation.
+- Missing input: agent returns `unavailable`, `UNKNOWN`, zero confidence, and a limitation. `DATA_MODE=fixture` is reserved for deterministic development/test inputs and labels all such evidence `synthetic`.
 - Partial input: agent returns `degraded` and identifies the limitation.
 - Exception: orchestrator converts it to an `error` result without crashing sibling tasks.
 - Conflict: synthesis explicitly records disagreement and lowers confidence.

@@ -46,7 +46,7 @@ The `200` response contains:
 - evidence and measured latency/risk metrics
 - warnings for degraded or conflicting data
 
-`market_data.source` identifies Yahoo, a fresh cache, a stale cache, or the curated fallback, while `market_data.synthetic` is always `true` for fixture data. News and evidence carry their own source names, URLs, timestamps, and synthetic labels.
+`market_data.source` identifies Yahoo, a fresh cache, or a stale cache. In production, an unavailable live dataset produces an explicit unavailable/error agent result rather than a curated fallback. `market_data.synthetic` is `true` only in explicit `DATA_MODE=fixture`. News and evidence carry their own source names, URLs, timestamps, and synthetic labels.
 
 Gemini is an explanation and current-context layer. It cannot change specialist classifications, deterministic synthesis scores, or the profile-specific recommendation. When Gemini is missing or fails, the deterministic analysis still returns and `ai_insight.status` is `unavailable` or `error`.
 

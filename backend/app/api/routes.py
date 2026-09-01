@@ -40,6 +40,7 @@ async def health(request: Request) -> dict[str, object]:
             "google_search_grounding": settings.gemini_grounding,
             "market_data_mode": settings.data_mode,
             "market_data_provider": "yahoo_finance" if settings.data_mode != "fixture" else "fixture",
+            "synthetic_fallback": "fixture_mode_only",
             "snapshot_cache": "supabase" if settings.has_supabase else "memory",
         },
     }

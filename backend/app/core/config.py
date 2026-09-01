@@ -30,7 +30,7 @@ class Settings:
     gemini_model: str = _env("GEMINI_MODEL", "gemini-2.5-flash")
     gemini_grounding: bool = _env_bool("GEMINI_GROUNDING", True)
     gemini_timeout_seconds: float = float(_env("GEMINI_TIMEOUT_SECONDS", "20"))
-    data_mode: str = _env("DATA_MODE", "hybrid").lower()
+    data_mode: str = _env("DATA_MODE", "live").lower()
     yahoo_exchange_suffix: str = _env("YAHOO_EXCHANGE_SUFFIX", ".NS")
     market_cache_ttl_seconds: int = int(_env("MARKET_CACHE_TTL_SECONDS", "900"))
     news_cache_ttl_seconds: int = int(_env("NEWS_CACHE_TTL_SECONDS", "1800"))

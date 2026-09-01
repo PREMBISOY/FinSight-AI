@@ -183,7 +183,7 @@ async def test_hybrid_service_reuses_fresh_live_snapshot() -> None:
 
 
 @pytest.mark.asyncio
-async def test_hybrid_service_uses_labeled_fixture_when_live_fails() -> None:
+async def test_optional_fixture_fallback_is_explicitly_labeled_for_test_mode() -> None:
     primary = StubDataService(DataNotFoundError("provider unavailable"))
     fallback = StubDataService(_market(source="fixture:curated", synthetic=True))
     service = HybridDataService(primary, fallback, InMemorySnapshotCache())
@@ -194,6 +194,17 @@ async def test_hybrid_service_uses_labeled_fixture_when_live_fails() -> None:
     assert result.source == "fixture:curated"
     assert primary.market_calls == 1
     assert fallback.market_calls == 1
+
+
+@pytest.mark.asyncio
+async def test_live_cached_service_never_uses_fixture_when_live_data_fails() -> None:
+    primary = StubDataService(DataNotFoundError("provider unavailable"))
+    service = HybridDataService(primary, None, InMemorySnapshotCache())
+
+    with pytest.raises(DataNotFoundError, match="Live market data"):
+        await service.market_data("RELIANCE")
+
+    assert primary.market_calls == 1
 
 
 class StaleCache:
@@ -229,6 +240,10 @@ async def test_hybrid_service_prefers_stale_live_snapshot_to_fixture() -> None:
 
 def test_data_service_modes_are_explicit() -> None:
     assert isinstance(build_data_service(Settings(data_mode="fixture")), FixtureDataService)
+    for mode in ("live", "hybrid"):
+        provider = build_data_service(Settings(data_mode=mode))
+        assert isinstance(provider, HybridDataService)
+        assert provider.fallback is None
     with pytest.raises(ValueError, match="DATA_MODE"):
         build_data_service(Settings(data_mode="invalid"))
 
