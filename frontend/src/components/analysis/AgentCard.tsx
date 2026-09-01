@@ -16,7 +16,7 @@ function SignalChip({ name, value, interpretation }: { name: string; value: stri
   const num   = typeof value === 'boolean' ? (value ? 1 : -1) : Number(value)
   const cls   = isNaN(num) ? 'signal-chip-neu' : num > 0.005 ? 'signal-chip-bull' : num < -0.005 ? 'signal-chip-bear' : 'signal-chip-neu'
   const arrow = isNaN(num) ? '—' : num > 0.005 ? '▲' : num < -0.005 ? '▼' : '●'
-  const arrowColor = isNaN(num) ? 'text-slate-500' : num > 0.005 ? 'text-emerald-400' : num < -0.005 ? 'text-red-400' : 'text-slate-400'
+  const arrowColor = isNaN(num) ? 'text-slate-500' : num > 0.005 ? 'text-emerald-600 dark:text-emerald-400' : num < -0.005 ? 'text-red-600 dark:text-red-400' : 'text-slate-500 dark:text-slate-400'
 
   const display = typeof value === 'boolean'
     ? (value ? 'TRUE' : 'FALSE')
@@ -28,9 +28,9 @@ function SignalChip({ name, value, interpretation }: { name: string; value: stri
     <div className={cls} title={interpretation}>
       <div className="flex items-center gap-1.5 min-w-0">
         <span className={`flex-shrink-0 text-xs ${arrowColor}`}>{arrow}</span>
-        <span className="text-slate-300 truncate">{name}</span>
+        <span className="text-slate-700 dark:text-slate-300 truncate">{name}</span>
       </div>
-      <span className="font-bold text-white flex-shrink-0 ml-2">{display}</span>
+      <span className="font-bold text-slate-900 dark:text-white flex-shrink-0 ml-2">{display}</span>
     </div>
   )
 }
@@ -62,8 +62,8 @@ export function AgentStatusRow({ agents, isRunning }: AgentStatusRowProps) {
                     ${done
                       ? `border-transparent ${cfg.iconBg}`
                       : isRunning
-                        ? 'border-surface-400 bg-surface-600'
-                        : 'border-surface-400 bg-surface-700'
+                        ? 'border-slate-300 bg-slate-100 dark:border-surface-400 dark:bg-surface-600'
+                        : 'border-slate-300 bg-slate-50 dark:border-surface-400 dark:bg-surface-700'
                     }
                   `}
                 >
@@ -85,7 +85,7 @@ export function AgentStatusRow({ agents, isRunning }: AgentStatusRowProps) {
 
               {/* Connector line (not after last) */}
               {idx < agentKeys.length - 1 && (
-                <div className="flex-1 h-px mx-2 bg-surface-400 relative">
+                <div className="flex-1 h-px mx-2 bg-slate-300 dark:bg-surface-400 relative">
                   {done && (
                     <div className="absolute inset-y-0 left-0 bg-brand-500/40 animate-slide-right" style={{ width: '100%', height: '1px' }} />
                   )}
@@ -118,14 +118,14 @@ export function AgentCard({ agent, defaultExpanded = true }: AgentCardProps) {
       {/* ── Header (clickable) ── */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-surface-600/30 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-surface-600/30 transition-colors"
       >
         <div className="flex items-center gap-3">
           <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${cfg.iconBg}`}>
             <Icon className={`w-4 h-4 ${cfg.iconColor}`} />
           </div>
           <div className="text-left">
-            <div className="text-sm font-bold text-slate-100">{cfg.label}</div>
+            <div className="text-sm font-bold text-slate-900 dark:text-slate-100">{cfg.label}</div>
             <div className="flex items-center gap-2 mt-0.5">
               <AgentStatusBadge value={agent.status} />
               <span className="text-[10px] text-slate-600 font-mono">{agent.latency_ms.toFixed(1)}ms</span>
@@ -159,10 +159,10 @@ export function AgentCard({ agent, defaultExpanded = true }: AgentCardProps) {
         <div className="px-4 pb-4 space-y-4 border-t border-surface-500 pt-4 animate-fade-in">
 
           {isUnavail ? (
-            <div className="flex items-start gap-3 p-3 bg-surface-600 rounded-lg border border-surface-400">
+            <div className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-surface-600 rounded-lg border border-slate-200 dark:border-surface-400">
               <AlertCircle className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm text-slate-400">Agent is <strong>{agent.status.toUpperCase()}</strong></p>
+                <p className="text-sm text-slate-700 dark:text-slate-400">Agent is <strong>{agent.status.toUpperCase()}</strong></p>
                 {agent.limitations.map((l, i) => (
                   <p key={i} className="text-xs text-slate-500 mt-1">{l}</p>
                 ))}
@@ -193,7 +193,7 @@ export function AgentCard({ agent, defaultExpanded = true }: AgentCardProps) {
                   <h4 className="section-label mb-2">Reasoning</h4>
                   <ul className="space-y-1.5">
                     {agent.reasoning.map((r, i) => (
-                      <li key={i} className="flex items-start gap-2 text-xs text-slate-400 leading-relaxed">
+                      <li key={i} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                         <span className="text-brand-400 flex-shrink-0 mt-0.5">›</span>
                         {r}
                       </li>
@@ -207,7 +207,7 @@ export function AgentCard({ agent, defaultExpanded = true }: AgentCardProps) {
                 <div>
                   <button
                     onClick={() => setEvidenceOpen(!evidenceOpen)}
-                    className="flex items-center gap-1.5 section-label hover:text-slate-300 transition-colors"
+                    className="flex items-center gap-1.5 section-label hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
                   >
                     {evidenceOpen
                       ? <ChevronDown  className="w-3 h-3" />
@@ -218,9 +218,9 @@ export function AgentCard({ agent, defaultExpanded = true }: AgentCardProps) {
                   {evidenceOpen && (
                     <div className="mt-2 space-y-2 animate-fade-in">
                       {agent.evidence.map((ev, i) => (
-                        <div key={i} className="bg-surface-600 rounded-lg p-3 border border-surface-400">
+                        <div key={i} className="bg-slate-50 dark:bg-surface-600 rounded-lg p-3 border border-slate-200 dark:border-surface-400">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs font-semibold text-slate-300">{ev.source_name}</span>
+                            <span className="text-xs font-semibold text-slate-800 dark:text-slate-300">{ev.source_name}</span>
                             <div className="flex items-center gap-2">
                               {ev.synthetic && <span className="tag tag-amber">SYNTHETIC</span>}
                               {ev.relevance_score != null && (
@@ -228,7 +228,7 @@ export function AgentCard({ agent, defaultExpanded = true }: AgentCardProps) {
                               )}
                             </div>
                           </div>
-                          <p className="text-xs text-slate-400 italic leading-relaxed">"{ev.excerpt}"</p>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 italic leading-relaxed">"{ev.excerpt}"</p>
                           <div className="flex items-center gap-3 mt-1.5">
                             <span className="text-[10px] text-slate-600">{ev.source_type}</span>
                             {ev.chunk_id && <span className="text-[10px] font-mono text-slate-600">{ev.chunk_id}</span>}

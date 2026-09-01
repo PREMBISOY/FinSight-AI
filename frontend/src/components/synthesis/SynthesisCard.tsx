@@ -36,7 +36,7 @@ function RadialGauge({ score }: { score: number }) {
   return (
     <div className="flex flex-col items-center">
       <svg width={size} height={size * 0.75} viewBox={`0 0 ${size} ${size * 0.9}`}>
-        <path d={trackPath} fill="none" stroke="#1a2535" strokeWidth={sw} strokeLinecap="round" />
+        <path d={trackPath} fill="none" stroke="var(--border)" strokeWidth={sw} strokeLinecap="round" />
         <path d={fillPath}  fill="none" stroke={color}   strokeWidth={sw} strokeLinecap="round"
               style={{ transition: 'stroke-dashoffset 1s ease-out' }}
         />
@@ -61,13 +61,13 @@ function ContribBar({ agent, weightedScore, confidence, weight, included }: {
   return (
     <div className="space-y-0.5">
       <div className="flex items-center justify-between text-[11px]">
-        <span className="font-mono text-slate-400 uppercase w-24">{agent}</span>
+        <span className="font-mono text-slate-600 dark:text-slate-400 uppercase w-24">{agent}</span>
         <span className="text-slate-600">w={weight.toFixed(2)} × {(confidence * 100).toFixed(0)}%</span>
         <span className={`font-mono font-bold ml-2 ${!included ? 'opacity-30' : ''}`} style={{ color }}>
           {weightedScore > 0 ? '+' : ''}{weightedScore.toFixed(3)}
         </span>
       </div>
-      <div className="h-1 rounded-full bg-surface-500 overflow-hidden">
+      <div className="h-1 rounded-full bg-slate-200 dark:bg-surface-500 overflow-hidden">
         <div className="h-full rounded-full transition-all duration-700"
              style={{ width: `${Math.min(100, widthPct * 100)}%`, background: color, opacity: included ? 1 : 0.2 }}
         />
@@ -132,7 +132,7 @@ export function SynthesisCard({ synthesis }: SynthesisCardProps) {
           <h4 className="section-label mb-2">Reasoning</h4>
           <ul className="space-y-1.5">
             {synthesis.reasoning.map((r, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs text-slate-400 leading-relaxed">
+              <li key={i} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                 <span className="text-brand-400 flex-shrink-0 mt-0.5">›</span>
                 {r}
               </li>

@@ -114,9 +114,9 @@ export function ScoreBar({ value, label }: ScoreBarProps) {
           </span>
         </div>
       )}
-      <div className="relative h-1.5 rounded-full bg-surface-500 overflow-hidden">
+      <div className="relative h-1.5 rounded-full bg-slate-200 dark:bg-surface-500 overflow-hidden">
         {/* centre line */}
-        <div className="absolute top-0 left-1/2 w-px h-full bg-surface-300 z-10" />
+        <div className="absolute top-0 left-1/2 w-px h-full bg-slate-400 dark:bg-surface-300 z-10" />
         <div
           className="absolute top-0 h-full rounded-full transition-all duration-700"
           style={{

@@ -7,9 +7,9 @@ interface MarketCardProps { data: MarketData }
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-surface-700 border border-surface-400 rounded-lg px-3 py-2 text-xs shadow-xl">
-      <div className="text-slate-400 mb-1">{label}</div>
-      <div className="font-mono font-bold text-white">₹{Number(payload[0]?.value).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+    <div className="card rounded-lg px-3 py-2 text-xs shadow-xl">
+      <div className="text-slate-500 dark:text-slate-400 mb-1">{label}</div>
+      <div className="font-mono font-bold text-slate-900 dark:text-white">₹{Number(payload[0]?.value).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
     </div>
   )
 }
@@ -18,9 +18,9 @@ function VolumeTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   const vol = Number(payload[0]?.value)
   return (
-    <div className="bg-surface-700 border border-surface-400 rounded-lg px-3 py-2 text-xs shadow-xl">
-      <div className="text-slate-400 mb-1">{label}</div>
-      <div className="font-mono text-blue-400">{(vol / 1_000_000).toFixed(2)}M</div>
+    <div className="card rounded-lg px-3 py-2 text-xs shadow-xl">
+      <div className="text-slate-500 dark:text-slate-400 mb-1">{label}</div>
+      <div className="font-mono text-blue-600 dark:text-blue-400">{(vol / 1_000_000).toFixed(2)}M</div>
     </div>
   )
 }
@@ -50,7 +50,7 @@ export function MarketCard({ data }: MarketCardProps) {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs font-mono text-slate-500 uppercase tracking-widest">NSE</span>
-            <h3 className="text-xl font-bold font-mono text-white tracking-wide">{data.symbol}</h3>
+            <h3 className="text-xl font-bold font-mono text-slate-900 dark:text-white tracking-wide">{data.symbol}</h3>
             {data.synthetic && <span className="tag tag-amber">SYNTHETIC</span>}
           </div>
           <div className="flex items-baseline gap-3">
@@ -68,11 +68,11 @@ export function MarketCard({ data }: MarketCardProps) {
         <div className="text-right space-y-1">
           <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-[11px]">
             <span className="text-slate-600 text-right">HIGH</span>
-            <span className="font-mono text-emerald-400">₹{hi.toLocaleString('en-IN')}</span>
+            <span className="font-mono text-emerald-600 dark:text-emerald-400">₹{hi.toLocaleString('en-IN')}</span>
             <span className="text-slate-600 text-right">LOW</span>
-            <span className="font-mono text-red-400">₹{lo.toLocaleString('en-IN')}</span>
+            <span className="font-mono text-red-600 dark:text-red-400">₹{lo.toLocaleString('en-IN')}</span>
             <span className="text-slate-600 text-right">PTS</span>
-            <span className="font-mono text-slate-300">{data.history.length}</span>
+            <span className="font-mono text-slate-700 dark:text-slate-300">{data.history.length}</span>
           </div>
         </div>
       </div>

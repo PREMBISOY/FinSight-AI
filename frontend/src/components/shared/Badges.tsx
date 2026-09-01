@@ -48,12 +48,12 @@ export function OutlookBadge({ value }: { value: MarketOutlook }) {
 
 // ── Recommendation ────────────────────────────────────────────────────────────
 const REC_CONFIG: Record<Recommendation, { label: string; icon: string; cls: string; glow: string }> = {
-  CONSIDER_ENTRY:       { label: 'Consider Entry',       icon: '▲', cls: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30', glow: 'card-glow-green' },
-  WATCH:                { label: 'Watch',                icon: '◎', cls: 'bg-blue-500/15    text-blue-400    border border-blue-500/30',    glow: 'card-glow-blue'  },
-  HOLD:                 { label: 'Hold',                 icon: '≡', cls: 'bg-slate-500/15   text-slate-300   border border-slate-500/30',   glow: '' },
-  REDUCE_EXPOSURE:      { label: 'Reduce Exposure',      icon: '▽', cls: 'bg-amber-500/15   text-amber-400   border border-amber-500/30',   glow: '' },
-  AVOID:                { label: 'Avoid',                icon: '✕', cls: 'bg-red-500/15     text-red-400     border border-red-500/30',     glow: 'card-glow-red'   },
-  INSUFFICIENT_EVIDENCE:{ label: 'Insufficient Evidence',icon: '?', cls: 'bg-slate-500/15   text-slate-400   border border-slate-500/30',   glow: '' },
+  CONSIDER_ENTRY:       { label: 'Consider Entry',       icon: '▲', cls: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30', glow: 'card-glow-green' },
+  WATCH:                { label: 'Watch',                icon: '◎', cls: 'bg-blue-500/15    text-blue-700 dark:text-blue-400 border border-blue-500/30',    glow: 'card-glow-blue'  },
+  HOLD:                 { label: 'Hold',                 icon: '≡', cls: 'bg-slate-500/15   text-slate-700 dark:text-slate-300 border border-slate-500/30',   glow: '' },
+  REDUCE_EXPOSURE:      { label: 'Reduce Exposure',      icon: '▽', cls: 'bg-amber-500/15   text-amber-700 dark:text-amber-400 border border-amber-500/30',   glow: '' },
+  AVOID:                { label: 'Avoid',                icon: '✕', cls: 'bg-red-500/15     text-red-700 dark:text-red-400 border border-red-500/30',     glow: 'card-glow-red'   },
+  INSUFFICIENT_EVIDENCE:{ label: 'Insufficient Evidence',icon: '?', cls: 'bg-slate-500/15   text-slate-700 dark:text-slate-400 border border-slate-500/30',   glow: '' },
 }
 
 export function RecommendationBadge({ value }: { value: Recommendation }) {

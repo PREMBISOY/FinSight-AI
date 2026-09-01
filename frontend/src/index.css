@@ -145,6 +145,17 @@
   }
   .finsight-input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 15%, transparent); }
   .finsight-input::placeholder { color: var(--text-muted); }
+
+  .auth-input { @apply pl-10 pr-3 py-3; }
+  .auth-input-icon { @apply absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none; }
+}
+
+.login-grid {
+  background-image:
+    linear-gradient(var(--border-muted) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-muted) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: linear-gradient(to bottom right, black, transparent 80%);
 }
 
 /* ── Animation keyframes ── */

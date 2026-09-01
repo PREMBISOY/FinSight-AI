@@ -1,25 +1,19 @@
-import { User, BarChart2, FileSearch, Radio, Loader2, ChevronDown, Search, Zap } from 'lucide-react'
+import { User, Loader2, Search, Zap, ShieldCheck, TrendingUp } from 'lucide-react'
 import type { InvestorProfile, Portfolio, DemoScenario } from '../../types/api'
-
-// ── Demo users ───────────────────────────────────────────────────────────────
-const USERS = [
-  { id: 'conservative-demo', label: 'Conservative',  sub: 'Long horizon · Low risk',   icon: '🛡️' },
-  { id: 'aggressive-demo',   label: 'Aggressive',    sub: 'Short horizon · High risk',  icon: '⚡' },
-]
+import type { PublicAccount } from '../../types/auth'
 
 const SCENARIOS: { value: DemoScenario; label: string; color: string }[] = [
-  { value: 'normal',            label: 'Normal',           color: 'text-emerald-400' },
-  { value: 'degraded_sentiment',label: 'Degraded Sentiment',color: 'text-amber-400'  },
-  { value: 'conflict',          label: 'Conflict',         color: 'text-red-400'     },
+  { value: 'normal',            label: 'Normal',           color: 'text-emerald-700 dark:text-emerald-400' },
+  { value: 'degraded_sentiment',label: 'Degraded Sentiment',color: 'text-amber-700 dark:text-amber-400'  },
+  { value: 'conflict',          label: 'Conflict',         color: 'text-red-700 dark:text-red-400'     },
 ]
 
 // ── Profile selector ─────────────────────────────────────────────────────────
 interface ProfileSelectorProps {
-  selectedUserId: string
+  account: PublicAccount
   selectedScenario: DemoScenario
   symbol: string
   query: string
-  onUserChange: (id: string) => void
   onScenarioChange: (s: DemoScenario) => void
   onSymbolChange: (s: string) => void
   onQueryChange: (query: string) => void
@@ -28,8 +22,8 @@ interface ProfileSelectorProps {
 }
 
 export function ProfileSelector({
-  selectedUserId, selectedScenario, symbol, query,
-  onUserChange, onScenarioChange, onSymbolChange, onQueryChange,
+  account, selectedScenario, symbol, query,
+  onScenarioChange, onSymbolChange, onQueryChange,
   onAnalyze, isRunning,
 }: ProfileSelectorProps) {
   const handleSubmit = (e: React.FormEvent) => {
@@ -43,25 +37,17 @@ export function ProfileSelector({
       {/* Row 1: User selector + Symbol + Analyze */}
       <div className="flex flex-wrap items-end gap-3">
 
-        {/* User pills */}
-        <div className="space-y-1">
-          <label className="section-label">Investor Profile</label>
-          <div className="flex gap-2">
-            {USERS.map(u => (
-              <button
-                key={u.id}
-                type="button"
-                onClick={() => onUserChange(u.id)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-200
-                  ${selectedUserId === u.id
-                    ? 'bg-brand-500/15 border-brand-500/40 text-brand-300'
-                    : 'border-surface-400 text-slate-500 hover:border-surface-300 hover:text-slate-300'
-                  }`}
-              >
-                <span>{u.icon}</span>
-                {u.label}
-              </button>
-            ))}
+        {/* Signed-in profile */}
+        <div className="space-y-1 min-w-[220px]">
+          <label className="section-label">Active investor profile</label>
+          <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg border border-brand-500/25 bg-brand-500/8">
+            {account.demoUserId === 'conservative-demo'
+              ? <ShieldCheck className="w-4 h-4 text-emerald-500" />
+              : <TrendingUp className="w-4 h-4 text-purple-500" />}
+            <div className="leading-tight">
+              <div className="text-xs font-semibold">{account.name}</div>
+              <div className="text-[10px] text-slate-500 capitalize">{account.demoUserId.replace('-demo', '')} strategy</div>
+            </div>
           </div>
         </div>
 
@@ -118,7 +104,7 @@ export function ProfileSelector({
             className={`px-2.5 py-0.5 rounded-md text-[11px] font-semibold border transition-all
               ${selectedScenario === s.value
                 ? `${s.color} border-current bg-current/10`
-                : 'text-slate-600 border-surface-400 hover:text-slate-400'
+                : 'text-slate-600 border-slate-300 hover:text-slate-900 dark:border-surface-400 dark:hover:text-slate-300'
               }`}
           >
             {s.label}
@@ -132,12 +118,13 @@ export function ProfileSelector({
 // ── Profile / Portfolio card ──────────────────────────────────────────────────
 interface ProfileCardProps {
   profile: InvestorProfile
+  displayName?: string
   portfolio: Portfolio
   watchlist: string[]
   analyzedSymbol: string
 }
 
-export function ProfileCard({ profile, portfolio, watchlist, analyzedSymbol }: ProfileCardProps) {
+export function ProfileCard({ profile, displayName, portfolio, watchlist, analyzedSymbol }: ProfileCardProps) {
   const exposure = portfolio.holdings.find(h => h.symbol.toUpperCase() === analyzedSymbol.toUpperCase())
 
   return (
@@ -148,7 +135,7 @@ export function ProfileCard({ profile, portfolio, watchlist, analyzedSymbol }: P
           <User className="w-4 h-4 text-brand-500 dark:text-brand-400" />
         </div>
         <div>
-          <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">{profile.display_name}</div>
+          <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">{displayName ?? profile.display_name}</div>
           <div className="text-[10px] text-slate-500 capitalize">{profile.risk_tolerance} · {profile.investment_horizon} horizon</div>
         </div>
       </div>
