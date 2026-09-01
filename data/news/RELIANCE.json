@@ -1,0 +1,32 @@
+[
+  {
+    "id": "news-rel-001",
+    "symbol": "RELIANCE",
+    "headline": "Reliance retail expansion supports growth outlook",
+    "summary": "A curated demo brief highlights resilient demand and improving digital engagement.",
+    "source_name": "HackVerse Curated News",
+    "published_at": "2026-09-01T08:20:00+05:30",
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "id": "news-rel-002",
+    "symbol": "RELIANCE",
+    "headline": "Analysts remain cautious about energy margin pressure",
+    "summary": "A curated demo brief notes weak refining spreads and downside risk if input costs rise.",
+    "source_name": "HackVerse Curated News",
+    "published_at": "2026-09-01T08:45:00+05:30",
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "id": "news-rel-003",
+    "symbol": "RELIANCE",
+    "headline": "Telecom subscriber additions stay stable",
+    "summary": "The latest curated checkpoint describes balanced operating trends without a major surprise.",
+    "source_name": "HackVerse Curated News",
+    "published_at": "2026-09-01T09:10:00+05:30",
+    "url": null,
+    "synthetic": true
+  }
+]

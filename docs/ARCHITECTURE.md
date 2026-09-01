@@ -1,0 +1,80 @@
+# FinSight AI Architecture
+
+## Product overview
+
+FinSight AI acts as a miniature research desk for retail investors. Independent agents answer narrowly scoped questions, expose their evidence and confidence, and never decide the final recommendation. Deterministic synthesis evaluates the market evidence; personalization then evaluates what that evidence means for one investor.
+
+## System architecture
+
+```text
+React dashboard (Aarya-owned repository area)
+      |
+      v
+FastAPI API -> context/data services -> curated or near-real-time inputs
+      |
+      v
+async orchestrator
+  |----------|-------------|
+  v          v             v
+Technical  Fundamental   Sentiment
+  |          + RAG          |
+  |----------|-------------|
+             v
+deterministic synthesis
+             v
+personalization and risk
+             v
+decision trace + metrics + evidence
+             v
+repository (Supabase or in-memory fallback)
+```
+
+The three agent calls are logical modules in one FastAPI process and run concurrently with `asyncio.gather(..., return_exceptions=True)`. This avoids Sprint 1 microservice overhead while retaining independent contracts.
+
+## Ownership boundaries
+
+- Prem: schemas, API, orchestrator, synthesis, personalization, repositories, integration, deployment.
+- Sunal: `backend/app/agents/technical/` implementation.
+- Aayush: `backend/app/agents/fundamental/` retrieval and analysis implementation.
+- Namish: `backend/app/agents/sentiment/` implementation and degraded/conflict QA.
+- Aarya: `frontend/` visual implementation.
+
+The interface files and shared schemas are integration boundaries. Implementations can be replaced without changing orchestrator code. Cross-owner fixes should be minimal and backwards compatible.
+
+## Data flow
+
+1. The API validates an analysis request.
+2. The repository loads the profile, portfolio, and watchlist.
+3. The data service loads labeled market, document, and news fixtures.
+4. The orchestrator starts three agents concurrently.
+5. Exceptions become explicit `error` outputs; missing feeds become `unavailable` outputs.
+6. Synthesis maps classifications to scores, applies documented weights, calculates agreement/completeness, and detects conflicts.
+7. Personalization considers risk tolerance, horizon, current exposure, and maximum position size.
+8. The complete result, evidence, and measured metrics are persisted.
+9. The API returns one frontend-ready response with a visible decision trace.
+
+## Decision logic
+
+Default weights are technical `0.40`, fundamental `0.40`, and sentiment `0.20`. Agent contribution is `classification_score × confidence × weight`, where bearish is `-1`, neutral is `0`, and bullish is `+1`. Unavailable results contribute no directional score and reduce data completeness. Opposing bullish and bearish results trigger a conflict penalty. Thresholds and weights live in configuration rather than agent prompts.
+
+An LLM may later rewrite already-calculated explanations, but it cannot choose the structured classification or recommendation.
+
+## Personalization
+
+Market synthesis is immutable across users. The risk engine then derives concentration and suitability. A conservative investor above maximum position size is held back from adding exposure, while an aggressive investor with low exposure may receive `CONSIDER_ENTRY` for the same positive market result. The rules are deterministic and tested.
+
+## Degraded-data handling
+
+- Missing input: agent returns `unavailable`, `UNKNOWN`, zero confidence, and a limitation.
+- Partial input: agent returns `degraded` and identifies the limitation.
+- Exception: orchestrator converts it to an `error` result without crashing sibling tasks.
+- Conflict: synthesis explicitly records disagreement and lowers confidence.
+- No usable evidence: output is `INSUFFICIENT_DATA`; no recommendation is fabricated.
+
+## Persistence
+
+`Repository` isolates storage from business logic. Development and tests use an in-memory repository with seeded demo users. When Supabase server credentials are configured, the factory selects the Supabase implementation. SQL migrations are reproducible under `supabase/migrations/`.
+
+## Deployment
+
+Railway runs the FastAPI service using the root `Procfile`/`railway.json`. Aarya's React/Vite client can be deployed independently and point to the backend API. Local functionality and tests take priority over deployment optimization.

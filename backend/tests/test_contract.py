@@ -1,0 +1,38 @@
+import pytest
+from pydantic import ValidationError
+
+from backend.app.schemas import AgentClassification, AgentOutput, AgentStatus, AgentType
+
+
+def test_agent_output_normalizes_confidence_contract() -> None:
+    output = AgentOutput(
+        agent=AgentType.TECHNICAL,
+        status=AgentStatus.SUCCESS,
+        classification=AgentClassification.BULLISH,
+        confidence=0.82,
+        latency_ms=12.5,
+    )
+    assert output.confidence == 0.82
+
+
+@pytest.mark.parametrize("confidence", [-0.01, 1.01])
+def test_agent_output_rejects_out_of_range_confidence(confidence: float) -> None:
+    with pytest.raises(ValidationError):
+        AgentOutput(
+            agent=AgentType.TECHNICAL,
+            status=AgentStatus.SUCCESS,
+            classification=AgentClassification.BULLISH,
+            confidence=confidence,
+            latency_ms=1,
+        )
+
+
+def test_unavailable_agent_cannot_fabricate_a_classification() -> None:
+    with pytest.raises(ValidationError):
+        AgentOutput(
+            agent=AgentType.SENTIMENT,
+            status=AgentStatus.UNAVAILABLE,
+            classification=AgentClassification.NEUTRAL,
+            confidence=0.3,
+            latency_ms=1,
+        )

@@ -1,0 +1,16 @@
+{
+  "symbol": "RELIANCE",
+  "current_price": 3005.0,
+  "currency": "INR",
+  "observed_at": "2026-09-01T09:55:00+05:30",
+  "source": "HackVerse curated near-real-time fixture",
+  "synthetic": true,
+  "history": [
+    {"timestamp": "2026-08-25T15:30:00+05:30", "close": 2888.0, "volume": 9100000},
+    {"timestamp": "2026-08-26T15:30:00+05:30", "close": 2905.0, "volume": 9400000},
+    {"timestamp": "2026-08-27T15:30:00+05:30", "close": 2932.0, "volume": 9800000},
+    {"timestamp": "2026-08-28T15:30:00+05:30", "close": 2964.0, "volume": 10200000},
+    {"timestamp": "2026-08-31T15:30:00+05:30", "close": 2982.0, "volume": 10500000},
+    {"timestamp": "2026-09-01T09:55:00+05:30", "close": 3005.0, "volume": 17600000}
+  ]
+}

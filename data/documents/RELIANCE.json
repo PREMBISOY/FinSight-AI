@@ -1,0 +1,32 @@
+[
+  {
+    "chunk_id": "rel-demo-earnings-p4-c1",
+    "symbol": "RELIANCE",
+    "source_name": "Reliance Demo Earnings Brief FY2026",
+    "source_type": "synthetic_earnings_brief",
+    "text": "Consolidated revenue grew 12 percent year over year. Retail demand remained strong and digital services increased average revenue per user. Management described the operating outlook as resilient.",
+    "page": 4,
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "chunk_id": "rel-demo-earnings-p7-c2",
+    "symbol": "RELIANCE",
+    "source_name": "Reliance Demo Earnings Brief FY2026",
+    "source_type": "synthetic_earnings_brief",
+    "text": "Free cash flow improved during the period and leverage remained stable. Capital expenditure was directed toward digital capacity and retail expansion.",
+    "page": 7,
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "chunk_id": "rel-demo-risk-p12-c1",
+    "symbol": "RELIANCE",
+    "source_name": "Reliance Demo Risk Note FY2026",
+    "source_type": "synthetic_risk_note",
+    "text": "The downside scenario identifies debt refinancing risk, regulatory uncertainty, and margin pressure in energy operations. A sustained decline in refining spreads could weaken near-term earnings.",
+    "page": 12,
+    "url": null,
+    "synthetic": true
+  }
+]
