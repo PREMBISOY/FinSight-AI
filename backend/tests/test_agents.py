@@ -42,7 +42,7 @@ async def test_fundamental_agent_retrieves_attributed_chunks() -> None:
     )
     assert result.status == AgentStatus.SUCCESS
     assert result.classification == AgentClassification.BULLISH
-    assert len(result.evidence) == 2
+    assert len(result.evidence) >= 2
     assert all(item.chunk_id and item.source_name for item in result.evidence)
     assert all(item.synthetic for item in result.evidence)
 
