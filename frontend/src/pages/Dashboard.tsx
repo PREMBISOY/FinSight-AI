@@ -9,7 +9,6 @@ import { IntelligenceCard } from '../components/intelligence/IntelligenceCard'
 import { DecisionTrace } from '../components/trace/DecisionTrace'
 import { MetricsPanel } from '../components/shared/MetricsPanel'
 import { DegradedWarning } from '../components/shared/DegradedWarning'
-import { GeminiInsightCard } from '../components/intelligence/GeminiInsightCard'
 import { Zap, BarChart2, Brain, AlertTriangle, ArrowUpRight, SearchCheck, FileSearch, Radio } from 'lucide-react'
 
 export function Dashboard() {
@@ -131,9 +130,6 @@ export function Dashboard() {
                 intelligence={result.intelligence}
                 profile={result.investor_profile}
               />
-            </div>
-            <div className="mt-4">
-              <GeminiInsightCard insight={result.ai_insight} />
             </div>
           </div>
 
