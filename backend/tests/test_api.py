@@ -1,5 +1,6 @@
 import httpx
 
+from backend import main as backend_main
 from backend.main import create_app
 
 
@@ -43,3 +44,35 @@ async def test_unknown_user_and_symbol_are_404(orchestrator) -> None:
         )
     assert user_response.status_code == 404
     assert symbol_response.status_code == 404
+
+
+async def test_built_frontend_is_served_without_hiding_api_routes(
+    orchestrator,
+    monkeypatch,
+    tmp_path,
+) -> None:
+    frontend_dist = tmp_path / "dist"
+    assets = frontend_dist / "assets"
+    assets.mkdir(parents=True)
+    (frontend_dist / "index.html").write_text(
+        "<!doctype html><title>FinSight AI</title>",
+        encoding="utf-8",
+    )
+    (assets / "index.css").write_text("body{}", encoding="utf-8")
+
+    monkeypatch.setattr(backend_main, "FRONTEND_DIST", frontend_dist)
+    transport = httpx.ASGITransport(app=create_app(orchestrator))
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        frontend = await client.get("/")
+        spa_route = await client.get("/dashboard")
+        health = await client.get("/health")
+        docs = await client.get("/docs")
+        asset = await client.get("/assets/index.css")
+
+    assert frontend.status_code == 200
+    assert "FinSight AI" in frontend.text
+    assert spa_route.status_code == 200
+    assert "FinSight AI" in spa_route.text
+    assert health.status_code == 200
+    assert docs.status_code == 200
+    assert asset.status_code == 200

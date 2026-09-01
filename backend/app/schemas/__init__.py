@@ -1,5 +1,6 @@
 from .agent import AgentOutput, Evidence, Signal
 from .analysis import (
+    AIInsight,
     AnalysisContext,
     AnalysisMetric,
     AnalysisResponse,
@@ -10,6 +11,8 @@ from .analysis import (
     MarketData,
     NewsItem,
     PersonalizedIntelligence,
+    PricePoint,
+    ResearchCitation,
     SynthesisResult,
 )
 from .enums import (
@@ -29,6 +32,7 @@ __all__ = [
     "AgentOutput",
     "AgentStatus",
     "AgentType",
+    "AIInsight",
     "AnalysisContext",
     "AnalysisMetric",
     "AnalysisResponse",
@@ -45,7 +49,9 @@ __all__ = [
     "NewsItem",
     "PersonalizedIntelligence",
     "Portfolio",
+    "PricePoint",
     "Recommendation",
+    "ResearchCitation",
     "RiskLevel",
     "RiskTolerance",
     "Signal",

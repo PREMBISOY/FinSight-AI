@@ -1,0 +1,52 @@
+[
+  {
+    "id": "news-rel-bear-001",
+    "symbol": "RELIANCE",
+    "headline": "Reliance misses earnings estimates as refining margins decline sharply",
+    "summary": "Weak refining spreads and rising input costs drove losses in the O2C segment. Analysts cautious with downgrade to sell.",
+    "source_name": "HackVerse Curated News",
+    "published_at": "2026-09-01T07:00:00+05:30",
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "id": "news-rel-bear-002",
+    "symbol": "RELIANCE",
+    "headline": "Rising debt and weak demand threaten Reliance growth outlook",
+    "summary": "Uncertainty in global demand outlook risk pressure on margins. Management warned of volatile operating environment and weak consumer sentiment.",
+    "source_name": "HackVerse Curated News",
+    "published_at": "2026-09-01T07:30:00+05:30",
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "id": "news-rel-bear-003",
+    "symbol": "RELIANCE",
+    "headline": "Reliance stock fell after downgrade on overvalued valuation concerns",
+    "summary": "Bearish sentiment from institutional investors after multiple downgrades. Caution advised as downside risks to earnings increased.",
+    "source_name": "HackVerse Curated News",
+    "published_at": "2026-09-01T08:00:00+05:30",
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "id": "news-rel-bear-004",
+    "symbol": "RELIANCE",
+    "headline": "Reliance Retail slowdown and losses signal concern for segment outlook",
+    "summary": "Revenue decline in retail division and weak footfall data worried analysts. Restructuring costs added further pressure to margins.",
+    "source_name": "HackVerse Curated News",
+    "published_at": "2026-09-01T08:30:00+05:30",
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "id": "news-rel-bear-005",
+    "symbol": "RELIANCE",
+    "headline": "Regulatory threat and competition risks rising for Reliance Jio",
+    "summary": "Uncertain regulatory environment and competition pressure risk subscriber losses. Pessimistic outlook from sector analysts following slowing growth.",
+    "source_name": "HackVerse Curated News",
+    "published_at": "2026-09-01T09:00:00+05:30",
+    "url": null,
+    "synthetic": true
+  }
+]

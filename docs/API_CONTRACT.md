@@ -6,9 +6,7 @@ The backend is the system of record. The frontend does not call agents directly.
 
 `GET /health`
 
-```json
-{"status":"ok","service":"finsight-api","version":"0.1.0"}
-```
+The response retains `status`, `service`, and `version`, and includes an `integrations` object showing the active repository, Gemini configuration, model, grounding setting, market-data mode/provider, and snapshot-cache backend. Configuration status does not imply a successful external network probe.
 
 ## User context
 
@@ -34,15 +32,27 @@ Unknown users return HTTP `404` with a concise `detail` message.
 
 `scenario` is one of `normal`, `degraded_sentiment`, or `conflict` and exists to make Sprint 1 judging deterministic. Production inputs would determine degradation naturally.
 
+The symbol is normalized before validation. Common index names are accepted: `NIFTY 50`, `NIFTY50`, and `NIFTY` resolve to the NIFTY 50 index; `SENSEX` and `BSE SENSEX` resolve to the BSE SENSEX; `BANK NIFTY` resolves to NIFTY Bank. Because indices do not have corporate financial statements, their fundamental agent may be explicitly unavailable while technical, news, synthesis, personalization, and Gemini still complete.
+
 The `200` response contains:
 
 - immutable market data and investor context
 - three complete `AgentOutput` objects
 - deterministic synthesis with score, agreement, completeness, conflict flag, contributions, and limitations
 - personalized recommendation and risk assessment
+- Gemini research insight with explicit status, model, latency, profile-specific considerations, risks, and Google Search grounding citations
+- the original query and scenario for auditability
 - ordered decision trace
 - evidence and measured latency/risk metrics
 - warnings for degraded or conflicting data
+
+`market_data.source` identifies Yahoo, a fresh cache, or a stale cache. In production, an unavailable live dataset produces an explicit unavailable/error agent result rather than a curated fallback. `market_data.synthetic` is `true` only in explicit `DATA_MODE=fixture`. News and evidence carry their own source names, URLs, timestamps, and synthetic labels.
+
+`symbol` accepts an NSE ticker such as `RELIANCE`, a BSE ticker with `.BO` such as `RELIANCE.BO`, or a company name up to 120 characters. Company names are resolved through Yahoo Finance search to an NSE/BSE equity (NSE is preferred for dual-listed companies); unmatched names return a clear 404 rather than an invented instrument.
+
+Gemini is an explanation and current-context layer. It cannot change specialist classifications, deterministic synthesis scores, or the profile-specific recommendation. When Gemini is missing or fails, the deterministic analysis still returns and `ai_insight.status` is `unavailable` or `error`.
+
+The frontend displays `query` beside `ai_insight.summary` in a dedicated “Answer to your research question” panel, including model, grounding citations, profile considerations, risks, and any limitation.
 
 Validation errors return HTTP `422`; missing users or symbols return `404`; an unexpected pipeline failure returns `500` without leaking secrets.
 

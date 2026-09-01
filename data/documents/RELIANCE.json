@@ -1,31 +1,121 @@
 [
   {
-    "chunk_id": "rel-demo-earnings-p4-c1",
+    "chunk_id": "rel-fy26-earnings-p4-c1",
     "symbol": "RELIANCE",
-    "source_name": "Reliance Demo Earnings Brief FY2026",
+    "source_name": "Reliance Industries Synthetic Earnings Brief FY2026",
     "source_type": "synthetic_earnings_brief",
-    "text": "Consolidated revenue grew 12 percent year over year. Retail demand remained strong and digital services increased average revenue per user. Management described the operating outlook as resilient.",
+    "text": "Consolidated revenue grew 12 percent year over year to approximately INR 10.2 lakh crore, driven by strong retail and digital services performance. EBITDA margin improved by 60 basis points to 16.8 percent. Management described the operating outlook as resilient and expressed confidence in sustaining double-digit revenue growth.",
     "page": 4,
     "url": null,
     "synthetic": true
   },
   {
-    "chunk_id": "rel-demo-earnings-p7-c2",
+    "chunk_id": "rel-fy26-earnings-p7-c2",
     "symbol": "RELIANCE",
-    "source_name": "Reliance Demo Earnings Brief FY2026",
+    "source_name": "Reliance Industries Synthetic Earnings Brief FY2026",
     "source_type": "synthetic_earnings_brief",
-    "text": "Free cash flow improved during the period and leverage remained stable. Capital expenditure was directed toward digital capacity and retail expansion.",
+    "text": "Free cash flow improved during the period to INR 62,000 crore, up 18 percent from the prior year. Net debt reduced by INR 15,000 crore as capital recycling proceeds were applied to deleveraging. Leverage remained stable with net debt to EBITDA at 1.1x, well within management guidance.",
     "page": 7,
     "url": null,
     "synthetic": true
   },
   {
-    "chunk_id": "rel-demo-risk-p12-c1",
+    "chunk_id": "rel-fy26-retail-p10-c1",
     "symbol": "RELIANCE",
-    "source_name": "Reliance Demo Risk Note FY2026",
+    "source_name": "Reliance Industries Synthetic Earnings Brief FY2026",
+    "source_type": "synthetic_earnings_brief",
+    "text": "Reliance Retail reported revenue of INR 3.35 lakh crore, registering 18 percent year-over-year growth. Store count expanded by 2,900 outlets to reach 18,836 stores across formats. Footfall increased 22 percent and basket size grew 5 percent, reflecting improved consumer spending and successful loyalty programme adoption.",
+    "page": 10,
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "chunk_id": "rel-fy26-digital-p13-c1",
+    "symbol": "RELIANCE",
+    "source_name": "Reliance Industries Synthetic Earnings Brief FY2026",
+    "source_type": "synthetic_earnings_brief",
+    "text": "Jio Platforms reported subscriber additions of 26 million in the quarter, bringing total subscribers to 472 million. Average revenue per user increased 8 percent to INR 195, driven by 5G uptake and premium plan migration. EBITDA for the segment grew 24 percent, reinforcing the strong digital services outlook.",
+    "page": 13,
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "chunk_id": "rel-fy26-o2c-p16-c1",
+    "symbol": "RELIANCE",
+    "source_name": "Reliance Industries Synthetic Earnings Brief FY2026",
+    "source_type": "synthetic_earnings_brief",
+    "text": "The Oil-to-Chemicals (O2C) segment revenue was INR 5.0 lakh crore. Refining throughput was at 99 percent of nameplate capacity. Singapore complex refining margin was USD 11.2 per barrel, below the prior-year USD 13.5 per barrel, reflecting softer global product spreads. Management noted partial offset from improved petrochemical realisations.",
+    "page": 16,
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "chunk_id": "rel-fy26-guidance-p19-c1",
+    "symbol": "RELIANCE",
+    "source_name": "Reliance Industries Synthetic Earnings Brief FY2026",
+    "source_type": "synthetic_earnings_brief",
+    "text": "Management guidance for FY2027 projects revenue growth of 10 to 14 percent, led by continued Retail expansion and Jio ARPU improvement. Capital expenditure is guided at INR 1.5 lakh crore, predominantly allocated toward digital infrastructure, new energy, and retail distribution. Management expressed strong conviction in long-term compounded growth.",
+    "page": 19,
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "chunk_id": "rel-fy26-newenergy-p22-c1",
+    "symbol": "RELIANCE",
+    "source_name": "Reliance Industries Synthetic Earnings Brief FY2026",
+    "source_type": "synthetic_earnings_brief",
+    "text": "New Energy investments accelerated in FY2026. Reliance commissioned its first 1 GW solar module manufacturing facility at Jamnagar. The green hydrogen roadmap targets 1 million metric tonnes per annum capacity by FY2030. Partnerships with global energy technology companies were formalised to support the expansion. Management views New Energy as a major long-term growth engine.",
+    "page": 22,
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "chunk_id": "rel-fy26-risk-p12-c1",
+    "symbol": "RELIANCE",
+    "source_name": "Reliance Industries Synthetic Risk Note FY2026",
     "source_type": "synthetic_risk_note",
-    "text": "The downside scenario identifies debt refinancing risk, regulatory uncertainty, and margin pressure in energy operations. A sustained decline in refining spreads could weaken near-term earnings.",
+    "text": "The downside scenario identifies debt refinancing risk, regulatory uncertainty in the telecom and energy sectors, and margin pressure in O2C operations. A sustained decline in global refining spreads could weaken near-term earnings. Dependency on imported crude exposes the business to currency and commodity volatility.",
     "page": 12,
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "chunk_id": "rel-fy26-risk-p14-c2",
+    "symbol": "RELIANCE",
+    "source_name": "Reliance Industries Synthetic Risk Note FY2026",
+    "source_type": "synthetic_risk_note",
+    "text": "Regulatory risk includes potential spectrum pricing revisions by TRAI, proposed environmental compliance costs for refinery upgrades, and evolving GST treatment of digital services. A shift in government policy on retail FDI could affect the competitive landscape. Management acknowledges these uncertainties but considers them manageable within the current capital structure.",
+    "page": 14,
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "chunk_id": "rel-fy26-risk-p16-c3",
+    "symbol": "RELIANCE",
+    "source_name": "Reliance Industries Synthetic Risk Note FY2026",
+    "source_type": "synthetic_risk_note",
+    "text": "Competitive pressure from Amazon, Flipkart, and other e-commerce operators poses a risk to Reliance Retail's gross merchandise value growth targets. Price-based promotions could compress retail EBITDA margins. Jio faces intensifying competition from Airtel's premium segment push, which may limit near-term ARPU improvement.",
+    "page": 16,
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "chunk_id": "rel-fy26-invest-p5-c1",
+    "symbol": "RELIANCE",
+    "source_name": "Reliance Industries Synthetic Investor Presentation FY2026",
+    "source_type": "synthetic_investor_presentation",
+    "text": "Reliance Industries delivered a return on equity of 11.2 percent in FY2026, improving from 9.8 percent in FY2025. Earnings per share grew 15 percent to INR 104. The board declared a dividend of INR 10 per share, reflecting strong cash generation and shareholder-return commitment. The stock re-rated to a price-to-earnings multiple of 28x on improved earnings quality.",
+    "page": 5,
+    "url": null,
+    "synthetic": true
+  },
+  {
+    "chunk_id": "rel-fy26-invest-p8-c2",
+    "symbol": "RELIANCE",
+    "source_name": "Reliance Industries Synthetic Investor Presentation FY2026",
+    "source_type": "synthetic_investor_presentation",
+    "text": "Analyst consensus targets a 12-month price objective of INR 1,620, representing 18 percent upside from the current market price. The investment thesis rests on three pillars: digital monetisation, retail scale, and new energy optionality. Analysts highlight the improved earnings visibility from Jio's subscriber base and Retail's national footprint as key positive catalysts.",
+    "page": 8,
     "url": null,
     "synthetic": true
   }
