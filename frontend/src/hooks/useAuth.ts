@@ -35,7 +35,10 @@ async function hashPassword(key: string, password: string): Promise<string> {
 }
 
 function initialAccount(): PublicAccount | null {
-  const activeLoginId = localStorage.getItem(SESSION_KEY)
+  // Sessions are tab-scoped so opening the site starts at the login page.
+  // Remove the legacy persistent session written by earlier frontend builds.
+  localStorage.removeItem(SESSION_KEY)
+  const activeLoginId = sessionStorage.getItem(SESSION_KEY)
   if (!activeLoginId) return null
   const account = readAccounts().find(item => item.loginId === activeLoginId)
   return account ? publicAccount(account) : null
@@ -61,7 +64,7 @@ export function useAuth() {
       createdAt: new Date().toISOString(),
     }
     localStorage.setItem(ACCOUNTS_KEY, JSON.stringify([...accounts, nextAccount]))
-    localStorage.setItem(SESSION_KEY, loginId)
+    sessionStorage.setItem(SESSION_KEY, loginId)
     setAccount(publicAccount(nextAccount))
   }, [])
 
@@ -70,11 +73,12 @@ export function useAuth() {
     if (!matchingAccount || matchingAccount.passwordHash !== await hashPassword(matchingAccount.loginId, password)) {
       throw new Error('Incorrect name or password.')
     }
-    localStorage.setItem(SESSION_KEY, matchingAccount.loginId)
+    sessionStorage.setItem(SESSION_KEY, matchingAccount.loginId)
     setAccount(publicAccount(matchingAccount))
   }, [])
 
   const signOut = useCallback(() => {
+    sessionStorage.removeItem(SESSION_KEY)
     localStorage.removeItem(SESSION_KEY)
     setAccount(null)
   }, [])
