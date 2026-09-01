@@ -50,19 +50,26 @@ class AnalysisOrchestrator:
         repository: Repository,
         data_service: FixtureDataService | None = None,
         agents: AgentSuite | None = None,
+        agent_timeout_seconds: float = 5.0,
     ) -> None:
         self.repository = repository
         self.data_service = data_service or FixtureDataService()
         self.agents = agents or AgentSuite()
+        self.agent_timeout_seconds = agent_timeout_seconds
 
     @staticmethod
     async def _safe_agent(
         expected_agent: AgentType,
         operation: Awaitable[AgentOutput],
+        timeout_seconds: float,
     ) -> AgentOutput:
         started = perf_counter()
         try:
-            result = await operation
+            result = await asyncio.wait_for(operation, timeout=timeout_seconds)
+            if not isinstance(result, AgentOutput):
+                raise TypeError(
+                    f"Agent contract mismatch: expected AgentOutput, received {type(result).__name__}"
+                )
             if result.agent != expected_agent:
                 raise ValueError(
                     f"Agent contract mismatch: expected {expected_agent.value}, received {result.agent.value}"
@@ -122,9 +129,9 @@ class AnalysisOrchestrator:
         fundamental_coro = self.agents.fundamental(request.symbol, request.query, context, documents)
         sentiment_coro = self.agents.sentiment(request.symbol, news_items, context)
         agent_results = await asyncio.gather(
-            self._safe_agent(AgentType.TECHNICAL, technical_coro),
-            self._safe_agent(AgentType.FUNDAMENTAL, fundamental_coro),
-            self._safe_agent(AgentType.SENTIMENT, sentiment_coro),
+            self._safe_agent(AgentType.TECHNICAL, technical_coro, self.agent_timeout_seconds),
+            self._safe_agent(AgentType.FUNDAMENTAL, fundamental_coro, self.agent_timeout_seconds),
+            self._safe_agent(AgentType.SENTIMENT, sentiment_coro, self.agent_timeout_seconds),
         )
 
         synthesis = synthesize(list(agent_results))
