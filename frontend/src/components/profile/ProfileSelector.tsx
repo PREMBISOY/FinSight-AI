@@ -67,17 +67,19 @@ export function ProfileSelector({
 
         {/* Symbol input */}
         <div className="space-y-1 flex-1 min-w-[120px]">
-          <label className="section-label">Symbol</label>
+          <label className="section-label">Stock / company</label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
             <input
               type="text"
               value={symbol}
               onChange={e => onSymbolChange(e.target.value.toUpperCase())}
-              placeholder="RELIANCE, NIFTY 50, SENSEX"
+              maxLength={120}
+              placeholder="RELIANCE, TCS.BO, or company name"
               className="finsight-input pl-8 pr-3 py-2 font-mono"
             />
           </div>
+          <p className="text-[11px] text-slate-500">NSE: RELIANCE · BSE: RELIANCE.BO · company names are resolved automatically</p>
         </div>
 
         {/* Analyze button */}

@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Protocol, TypeVar
 
 from backend.app.core.config import Settings, settings
+from backend.app.core.symbols import canonical_symbol
 from backend.app.schemas import DocumentChunk, MarketData, NewsItem
 
 from .cache import CachedSnapshot, SnapshotCache, build_snapshot_cache
@@ -22,6 +23,8 @@ class DataNotFoundError(LookupError):
 
 
 class DataService(Protocol):
+    async def resolve_symbol(self, symbol: str) -> str: ...
+
     async def market_data(self, symbol: str) -> MarketData: ...
 
     async def news_items(self, symbol: str) -> list[NewsItem]: ...
@@ -40,6 +43,9 @@ class FixtureDataService:
         if not path.exists():
             raise DataNotFoundError(f"No curated dataset is available for {path.stem.upper()}")
         return json.loads(path.read_text(encoding="utf-8"))
+
+    async def resolve_symbol(self, symbol: str) -> str:
+        return canonical_symbol(symbol)
 
     async def market_data(self, symbol: str) -> MarketData:
         payload = await asyncio.to_thread(
@@ -85,6 +91,16 @@ class HybridDataService:
         self.market_ttl_seconds = market_ttl_seconds
         self.news_ttl_seconds = news_ttl_seconds
         self.fundamentals_ttl_seconds = fundamentals_ttl_seconds
+
+    async def resolve_symbol(self, symbol: str) -> str:
+        """Delegate resolution to the live provider before cache keys are created."""
+
+        try:
+            return await self.primary.resolve_symbol(symbol)
+        except Exception:
+            if self.fallback is not None:
+                return await self.fallback.resolve_symbol(symbol)
+            raise
 
     async def _cached(self, symbol: str, data_type: str) -> CachedSnapshot | None:
         try:

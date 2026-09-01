@@ -68,8 +68,8 @@ class AnalyzeRequest(BaseModel):
     user_id: str = Field(min_length=1, max_length=100, pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
     symbol: str = Field(
         min_length=1,
-        max_length=20,
-        pattern=r"^[A-Za-z0-9][A-Za-z0-9.&_-]*$",
+        max_length=120,
+        pattern=r"^[A-Za-z0-9][A-Za-z0-9 .&_'()/-]*$",
     )
     query: str = Field(
         default="What do the latest financial evidence and outlook imply?",

@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from backend.app.core.config import Settings
-from backend.app.schemas import DocumentChunk, MarketData, NewsItem, PricePoint
+from backend.app.schemas import AnalyzeRequest, DocumentChunk, MarketData, NewsItem, PricePoint
 from backend.app.services.cache import CachedSnapshot, InMemorySnapshotCache, SupabaseSnapshotCache
 from backend.app.services.data import (
     DataNotFoundError,
@@ -97,6 +97,49 @@ def test_yahoo_adapter_preserves_explicit_exchange_symbols() -> None:
     assert service.provider_symbol("TCS.BO") == "TCS.BO"
     assert service.provider_symbol("^NSEI") == "^NSEI"
     assert service.provider_symbol("USDINR=X") == "USDINR=X"
+
+
+@pytest.mark.asyncio
+async def test_yahoo_adapter_resolves_indian_company_name_to_nse_ticker() -> None:
+    searched: list[str] = []
+
+    def search(query: str) -> list[dict[str, object]]:
+        searched.append(query)
+        return [
+            {
+                "symbol": "TMPV.BO",
+                "exchange": "BSE",
+                "quoteType": "EQUITY",
+                "longname": "Tata Motors Passenger Vehicles Limited",
+            },
+            {
+                "symbol": "TMPV.NS",
+                "exchange": "NSI",
+                "quoteType": "EQUITY",
+                "longname": "Tata Motors Passenger Vehicles Limited",
+            },
+            {
+                "symbol": "TM.N",
+                "exchange": "NYQ",
+                "quoteType": "EQUITY",
+                "longname": "Toyota Motor Corporation",
+            },
+        ]
+
+    service = YahooFinanceDataService(symbol_search=search)
+
+    assert await service.resolve_symbol("Tata Motors Passenger Vehicles Ltd") == "TMPV.NS"
+    assert searched == ["TATA MOTORS PASSENGER VEHICLES LTD"]
+    assert await service.resolve_symbol("TMPV.BO") == "TMPV.BO"
+
+
+def test_analysis_request_accepts_company_name_input() -> None:
+    request = AnalyzeRequest(
+        user_id="conservative-demo",
+        symbol="Tata Motors Passenger Vehicles Ltd",
+    )
+
+    assert request.symbol == "TATA MOTORS PASSENGER VEHICLES LTD"
 
 
 @pytest.mark.parametrize(

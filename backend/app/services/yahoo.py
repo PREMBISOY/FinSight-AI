@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import math
+import re
 from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Any
@@ -16,6 +17,11 @@ from .data import DataNotFoundError
 
 
 TickerFactory = Callable[[str], Any]
+SymbolSearch = Callable[[str], list[dict[str, Any]]]
+
+
+_DIRECT_TICKER = re.compile(r"^[A-Z0-9][A-Z0-9.&_-]{0,19}$")
+_INDIAN_EXCHANGES = {"NSE", "NSI", "BSE", "BOM"}
 
 
 class YahooFinanceDataService:
@@ -25,12 +31,49 @@ class YahooFinanceDataService:
         self,
         exchange_suffix: str = ".NS",
         ticker_factory: TickerFactory | None = None,
+        symbol_search: SymbolSearch | None = None,
     ) -> None:
         self.exchange_suffix = exchange_suffix
         self._ticker_factory = ticker_factory
+        self._symbol_search = symbol_search
 
     def provider_symbol(self, symbol: str) -> str:
         return yahoo_symbol(symbol, self.exchange_suffix)
+
+    async def resolve_symbol(self, symbol: str) -> str:
+        """Resolve a company name to an Indian Yahoo ticker when needed.
+
+        Exchange tickers are intentionally passed through without a search so
+        ``RELIANCE``, ``RELIANCE.NS``, and ``RELIANCE.BO`` stay predictable.
+        Company-name searches are restricted to NSE/BSE equities and prefer NSE
+        where the same company trades on both exchanges.
+        """
+
+        normalized = symbol.strip().upper()
+        if _DIRECT_TICKER.fullmatch(normalized):
+            return normalized
+        return await asyncio.to_thread(self._resolve_company_name_sync, normalized)
+
+    def _resolve_company_name_sync(self, query: str) -> str:
+        try:
+            if self._symbol_search is not None:
+                quotes = self._symbol_search(query)
+            else:
+                import yfinance as yf
+
+                quotes = yf.Search(query, max_results=20, news_count=0).quotes
+        except Exception as exc:
+            raise DataNotFoundError(
+                f"Could not search Yahoo Finance for '{query}'. Try an NSE ticker such as "
+                "RELIANCE or a BSE ticker such as RELIANCE.BO."
+            ) from exc
+
+        candidates = [quote for quote in quotes or [] if _is_indian_equity(quote)]
+        if not candidates:
+            raise DataNotFoundError(
+                f"No NSE/BSE stock matched '{query}'. Use its NSE symbol or add .BO for a BSE symbol."
+            )
+        return _best_indian_match(query, candidates)
 
     def _ticker(self, symbol: str) -> Any:
         provider_symbol = self.provider_symbol(symbol)
@@ -183,6 +226,44 @@ def _finite_number(value: Any) -> float | None:
     except (TypeError, ValueError):
         return None
     return number if math.isfinite(number) else None
+
+
+def _is_indian_equity(quote: object) -> bool:
+    if not isinstance(quote, dict):
+        return False
+    symbol = str(quote.get("symbol") or "").upper()
+    exchange = str(quote.get("exchange") or "").upper()
+    quote_type = str(quote.get("quoteType") or quote.get("typeDisp") or "").upper()
+    is_indian_listing = symbol.endswith((".NS", ".BO")) or exchange in _INDIAN_EXCHANGES
+    return is_indian_listing and quote_type in {"EQUITY", "STOCK"}
+
+
+def _best_indian_match(query: str, candidates: list[dict[str, Any]]) -> str:
+    """Choose Yahoo's best NSE/BSE equity result deterministically."""
+
+    wanted = _company_key(query)
+
+    def rank(item: tuple[int, dict[str, Any]]) -> tuple[int, int, int]:
+        index, quote = item
+        symbol = str(quote.get("symbol") or "").upper()
+        names = (str(quote.get("longname") or ""), str(quote.get("shortname") or ""))
+        exact_name = any(_company_key(name) == wanted for name in names)
+        name_contains_query = any(wanted and wanted in _company_key(name) for name in names)
+        nse_preferred = symbol.endswith(".NS") or str(quote.get("exchange") or "").upper() in {"NSE", "NSI"}
+        return (2 if exact_name else 1 if name_contains_query else 0, 1 if nse_preferred else 0, -index)
+
+    best = max(enumerate(candidates), key=rank)[1]
+    symbol = str(best.get("symbol") or "").strip().upper()
+    if not symbol:
+        raise DataNotFoundError("Yahoo Finance returned an NSE/BSE search result without a ticker.")
+    if "." not in symbol:
+        exchange = str(best.get("exchange") or "").upper()
+        symbol += ".BO" if exchange in {"BSE", "BOM"} else ".NS"
+    return symbol
+
+
+def _company_key(value: str) -> str:
+    return re.sub(r"[^A-Z0-9]", "", value.upper())
 
 
 def _as_datetime(value: Any) -> datetime:

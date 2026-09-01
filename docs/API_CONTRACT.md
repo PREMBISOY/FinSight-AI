@@ -48,6 +48,8 @@ The `200` response contains:
 
 `market_data.source` identifies Yahoo, a fresh cache, or a stale cache. In production, an unavailable live dataset produces an explicit unavailable/error agent result rather than a curated fallback. `market_data.synthetic` is `true` only in explicit `DATA_MODE=fixture`. News and evidence carry their own source names, URLs, timestamps, and synthetic labels.
 
+`symbol` accepts an NSE ticker such as `RELIANCE`, a BSE ticker with `.BO` such as `RELIANCE.BO`, or a company name up to 120 characters. Company names are resolved through Yahoo Finance search to an NSE/BSE equity (NSE is preferred for dual-listed companies); unmatched names return a clear 404 rather than an invented instrument.
+
 Gemini is an explanation and current-context layer. It cannot change specialist classifications, deterministic synthesis scores, or the profile-specific recommendation. When Gemini is missing or fails, the deterministic analysis still returns and `ai_insight.status` is `unavailable` or `error`.
 
 The frontend displays `query` beside `ai_insight.summary` in a dedicated “Answer to your research question” panel, including model, grounding citations, profile considerations, risks, and any limitation.

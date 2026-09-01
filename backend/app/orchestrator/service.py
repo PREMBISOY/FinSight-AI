@@ -97,6 +97,14 @@ class AnalysisOrchestrator:
             self.repository.get_watchlist(request.user_id),
         )
 
+        # A user may submit a company name (for example, "Tata Motors
+        # Passenger Vehicles Ltd") rather than an exchange ticker. Resolve it
+        # once before data requests so every agent, cache key, and response uses
+        # the same NSE/BSE Yahoo Finance symbol.
+        resolved_symbol = await self.data_service.resolve_symbol(request.symbol)
+        if resolved_symbol != request.symbol:
+            request = request.model_copy(update={"symbol": resolved_symbol})
+
         raw_market, raw_news, raw_documents = await asyncio.gather(
             self.data_service.market_data(request.symbol),
             self.data_service.news_items(request.symbol),
