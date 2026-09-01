@@ -4,38 +4,33 @@ import { MockModeBanner } from '../shared/DegradedWarning'
 
 export function Header() {
   return (
-    <header className="border-b border-white/5 bg-surface-800/80 backdrop-blur-sm sticky top-0 z-50">
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+    <header className="border-b border-white/10 bg-surface-900/85 backdrop-blur-xl sticky top-0 z-50">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
         {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 bg-brand-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-brand-500/20">
             <TrendingUp className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-base font-bold text-white tracking-tight leading-none">FinSight AI</h1>
-            <p className="text-xs text-slate-500 leading-none mt-0.5">Multi-Agent Financial Intelligence</p>
+            <h1 className="text-base font-bold text-white tracking-tight leading-none">FinSight</h1>
+            <p className="text-[11px] text-slate-500 leading-none mt-1">Investment research workspace</p>
           </div>
         </div>
 
         {/* Center: pipeline legend */}
-        <div className="hidden lg:flex items-center gap-1 text-xs text-slate-500 font-mono">
-          <span className="px-2 py-1 bg-surface-600 rounded border border-white/5">DATA</span>
-          <span>→</span>
-          <span className="px-2 py-1 bg-surface-600 rounded border border-white/5">TECHNICAL</span>
-          <span className="px-2 py-1 bg-surface-600 rounded border border-white/5">FUNDAMENTAL</span>
-          <span className="px-2 py-1 bg-surface-600 rounded border border-white/5">SENTIMENT</span>
-          <span>→</span>
-          <span className="px-2 py-1 bg-surface-600 rounded border border-white/5">SYNTHESIS</span>
-          <span>→</span>
-          <span className="px-2 py-1 bg-brand-600/30 rounded border border-brand-500/30 text-brand-400">INTELLIGENCE</span>
+        <div className="hidden xl:flex items-center gap-2 text-[10px] font-bold tracking-[0.1em] text-slate-500">
+          <span>3 AGENTS</span><span className="w-8 h-px bg-slate-700" />
+          <span>SYNTHESIS</span><span className="w-8 h-px bg-slate-700" />
+          <span className="text-brand-400">PERSONALIZED VIEW</span>
         </div>
 
         {/* Right: status */}
         <div className="flex items-center gap-3">
           <MockModeBanner visible={isMockMode} />
-          <div className="flex items-center gap-1.5 text-xs text-slate-500">
-            <Activity className="w-3.5 h-3.5" />
-            <span>HackVerse Sprint 1</span>
+          <div className="hidden sm:flex items-center gap-2 text-[11px] text-slate-400 bg-surface-800 border border-white/5 px-2.5 py-1.5 rounded-full">
+            <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-70" /><span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-brand-400" /></span>
+            <Activity className="w-3.5 h-3.5 text-brand-400" />
+            <span>Research desk online</span>
           </div>
         </div>
       </div>

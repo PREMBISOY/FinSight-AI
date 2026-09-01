@@ -9,7 +9,7 @@ import { IntelligenceCard } from '../components/intelligence/IntelligenceCard'
 import { DecisionTrace } from '../components/trace/DecisionTrace'
 import { MetricsPanel } from '../components/shared/MetricsPanel'
 import { DegradedWarning } from '../components/shared/DegradedWarning'
-import { Zap, BarChart2, Brain, AlertTriangle } from 'lucide-react'
+import { Zap, BarChart2, Brain, AlertTriangle, ArrowUpRight, SearchCheck, FileSearch, Radio } from 'lucide-react'
 
 export function Dashboard() {
   const [userId, setUserId] = useState('conservative-demo')
@@ -24,7 +24,7 @@ export function Dashboard() {
   const isRunning = state === 'running'
 
   return (
-    <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
 
       {/* ---- Controls ---- */}
       <ProfileSelector
@@ -136,30 +136,25 @@ export function Dashboard() {
 
       {/* ---- Idle state ---- */}
       {state === 'idle' && (
-        <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-brand-600/10 border border-brand-500/20 flex items-center justify-center">
-            <Brain className="w-8 h-8 text-brand-400" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-white">Ready to Analyze</h2>
-            <p className="text-sm text-slate-500 mt-1 max-w-md">
-              Select an investor profile, choose a scenario, and click Analyze to watch the multi-agent pipeline execute.
-            </p>
-          </div>
-          <div className="grid grid-cols-3 gap-3 max-w-md text-xs text-slate-600">
-            <div className="bg-surface-700 border border-white/5 rounded-lg p-3">
-              <div className="text-brand-400 font-semibold mb-1">TECHNICAL</div>
-              Price · Volume · Momentum
+        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1.9fr] gap-4 animate-fade-in">
+          <section className="card p-6 sm:p-8 flex flex-col justify-between min-h-[280px] relative overflow-hidden">
+            <div className="absolute -right-10 -top-10 w-44 h-44 rounded-full border border-brand-400/15" />
+            <div className="relative">
+              <div className="eyebrow mb-3">Ready when you are</div>
+              <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white max-w-sm">A complete view, before you make a move.</h2>
+              <p className="text-sm leading-6 text-slate-400 mt-4 max-w-md">Choose a profile and scenario above. FinSight will preserve evidence, reconcile the signals, and tailor the recommendation to the investor.</p>
             </div>
-            <div className="bg-surface-700 border border-white/5 rounded-lg p-3">
-              <div className="text-purple-400 font-semibold mb-1">FUNDAMENTAL</div>
-              Earnings · RAG · Documents
+            <div className="relative flex items-center gap-2 text-xs text-brand-400 mt-7"><span>Start a research run</span><ArrowUpRight className="w-4 h-4" /></div>
+          </section>
+          <section className="card p-5 sm:p-6">
+            <div className="flex items-center justify-between mb-5"><div><div className="eyebrow mb-1">What is checked</div><h2 className="panel-heading">Independent signals, one decision</h2></div><span className="text-xs text-slate-500 font-mono">01 — 04</span></div>
+            <div className="grid sm:grid-cols-3 gap-3">
+              <div className="rounded-lg border border-white/5 bg-surface-800/45 p-4"><SearchCheck className="w-5 h-5 text-brand-400 mb-5" /><div className="text-xs font-semibold text-white">Technical</div><p className="text-xs text-slate-500 leading-5 mt-1">Price action, momentum and volume.</p></div>
+              <div className="rounded-lg border border-white/5 bg-surface-800/45 p-4"><FileSearch className="w-5 h-5 text-purple-400 mb-5" /><div className="text-xs font-semibold text-white">Fundamental</div><p className="text-xs text-slate-500 leading-5 mt-1">Earnings context and source documents.</p></div>
+              <div className="rounded-lg border border-white/5 bg-surface-800/45 p-4"><Radio className="w-5 h-5 text-cyan-400 mb-5" /><div className="text-xs font-semibold text-white">Sentiment</div><p className="text-xs text-slate-500 leading-5 mt-1">News pulse and market mood.</p></div>
             </div>
-            <div className="bg-surface-700 border border-white/5 rounded-lg p-3">
-              <div className="text-cyan-400 font-semibold mb-1">SENTIMENT</div>
-              News · Market Mood
-            </div>
-          </div>
+            <div className="mt-4 pt-4 border-t border-white/5 flex flex-wrap gap-x-6 gap-y-2 text-xs text-slate-500"><span><span className="text-slate-300">Synthesis</span> resolves disagreement</span><span><span className="text-slate-300">Personalization</span> comes last</span></div>
+          </section>
         </div>
       )}
     </div>

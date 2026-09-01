@@ -12,9 +12,9 @@ const agentIcons = {
 }
 
 const agentColors = {
-  technical:   { border: 'border-brand-500/30',   glow: 'shadow-brand-500/10',   label: 'TECHNICAL',   dot: 'bg-brand-500' },
-  fundamental: { border: 'border-purple-500/30',  glow: 'shadow-purple-500/10',  label: 'FUNDAMENTAL', dot: 'bg-purple-500' },
-  sentiment:   { border: 'border-cyan-500/30',    glow: 'shadow-cyan-500/10',    label: 'SENTIMENT',   dot: 'bg-cyan-500' },
+  technical:   { border: 'border-brand-500/30',   glow: 'shadow-brand-500/10',   label: 'TECHNICAL',   dot: 'bg-brand-500', icon: 'bg-brand-500/10' },
+  fundamental: { border: 'border-purple-500/30',  glow: 'shadow-purple-500/10',  label: 'FUNDAMENTAL', dot: 'bg-purple-500', icon: 'bg-purple-500/10' },
+  sentiment:   { border: 'border-cyan-500/30',    glow: 'shadow-cyan-500/10',    label: 'SENTIMENT',   dot: 'bg-cyan-500', icon: 'bg-cyan-500/10' },
 }
 
 // ---- Agent status row (compact, shown during/after analysis) ----
@@ -97,7 +97,7 @@ export function AgentCard({ agent, defaultExpanded = false }: AgentCardProps) {
         className="w-full flex items-center justify-between p-4 hover:bg-surface-600/30 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className={clsx('w-8 h-8 rounded-lg flex items-center justify-center', `bg-${colors.dot.replace('bg-', '')}/10`)}>
+          <div className={clsx('w-8 h-8 rounded-lg flex items-center justify-center', colors.icon)}>
             <Icon className="w-4 h-4 text-slate-300" />
           </div>
           <div className="text-left">
