@@ -7,7 +7,7 @@ import type { AnalysisResponse, AnalyzeRequest, UserContext } from '../types/api
 import { mockAnalyze, mockGetUserContext } from './mockApi'
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
 
 // ---- Real API calls ----
 
