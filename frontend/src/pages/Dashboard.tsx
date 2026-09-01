@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { DemoScenario } from '../types/api'
+import type { PublicAccount } from '../types/auth'
 import { useAnalysis } from '../hooks/useAnalysis'
 import { ProfileSelector, ProfileCard } from '../components/profile/ProfileSelector'
 import { AgentStatusRow, AgentCard } from '../components/analysis/AgentCard'
@@ -103,14 +104,17 @@ function IdleHero() {
 }
 
 // ── Main Dashboard ────────────────────────────────────────────────────────────
-export function Dashboard() {
-  const [userId,   setUserId]   = useState('conservative-demo')
+interface DashboardProps {
+  account: PublicAccount
+}
+
+export function Dashboard({ account }: DashboardProps) {
+  const userId = account.demoUserId
   const [symbol,   setSymbol]   = useState('RELIANCE')
   const [query, setQuery] = useState('What do the latest financial evidence and outlook imply?')
   const [scenario, setScenario] = useState<DemoScenario>('normal')
   const { state, result, error, run, reset } = useAnalysis()
 
-  const handleUserChange     = (id: string)          => { setUserId(id);       reset() }
   const handleScenarioChange = (s: DemoScenario)     => { setScenario(s);      reset() }
   const handleSymbolChange   = (s: string)           => { setSymbol(s);        reset() }
   const handleQueryChange    = (value: string)       => { setQuery(value);      reset() }
@@ -123,11 +127,10 @@ export function Dashboard() {
 
       {/* Controls */}
       <ProfileSelector
-        selectedUserId={userId}
+        account={account}
         selectedScenario={scenario}
         symbol={symbol}
         query={query}
-        onUserChange={handleUserChange}
         onScenarioChange={handleScenarioChange}
         onSymbolChange={handleSymbolChange}
         onQueryChange={handleQueryChange}
@@ -141,7 +144,7 @@ export function Dashboard() {
           <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
           <div>
             <span className="text-sm font-semibold text-red-400">Analysis failed</span>
-            <p className="text-xs text-slate-400 mt-0.5">{error}</p>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">{error}</p>
           </div>
         </div>
       )}
@@ -182,6 +185,7 @@ export function Dashboard() {
             </div>
             <ProfileCard
               profile={result.investor_profile}
+              displayName={account.name}
               portfolio={result.portfolio}
               watchlist={result.watchlist}
               analyzedSymbol={result.symbol}

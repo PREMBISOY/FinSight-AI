@@ -7,9 +7,9 @@ interface MarketCardProps { data: MarketData }
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-surface-700 border border-surface-400 rounded-lg px-3 py-2 text-xs shadow-xl">
-      <div className="text-slate-400 mb-1">{label}</div>
-      <div className="font-mono font-bold text-white">₹{Number(payload[0]?.value).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+    <div className="card rounded-lg px-3 py-2 text-xs shadow-xl">
+      <div className="mb-1" style={{ color: 'var(--text-muted)' }}>{label}</div>
+      <div className="font-mono font-bold" style={{ color: 'var(--text-primary)' }}>₹{Number(payload[0]?.value).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
     </div>
   )
 }
@@ -18,9 +18,9 @@ function VolumeTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   const vol = Number(payload[0]?.value)
   return (
-    <div className="bg-surface-700 border border-surface-400 rounded-lg px-3 py-2 text-xs shadow-xl">
-      <div className="text-slate-400 mb-1">{label}</div>
-      <div className="font-mono text-blue-400">{(vol / 1_000_000).toFixed(2)}M</div>
+    <div className="card rounded-lg px-3 py-2 text-xs shadow-xl">
+      <div className="mb-1" style={{ color: 'var(--text-muted)' }}>{label}</div>
+      <div className="font-mono" style={{ color: 'var(--brand)' }}>{(vol / 1_000_000).toFixed(2)}M</div>
     </div>
   )
 }
@@ -36,7 +36,7 @@ export function MarketCard({ data }: MarketCardProps) {
   const change     = data.current_price - firstClose
   const changePct  = (change / firstClose) * 100
   const isPositive = change >= 0
-  const trendColor = isPositive ? '#00d09c' : '#ff5252'
+  const trendColor = isPositive ? 'var(--bullish)' : 'var(--bearish)'
   const gradientId = isPositive ? 'bullishGrad' : 'bearishGrad'
 
   const hi = Math.max(...data.history.map(p => p.close))
@@ -49,8 +49,8 @@ export function MarketCard({ data }: MarketCardProps) {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-mono text-slate-500 uppercase tracking-widest">NSE</span>
-            <h3 className="text-xl font-bold font-mono text-white tracking-wide">{data.symbol}</h3>
+            <span className="text-xs font-mono uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>NSE</span>
+            <h3 className="text-xl font-bold font-mono tracking-wide" style={{ color: 'var(--text-primary)' }}>{data.symbol}</h3>
             {data.synthetic && <span className="tag tag-amber">SYNTHETIC</span>}
           </div>
           <div className="flex items-baseline gap-3">
@@ -68,11 +68,11 @@ export function MarketCard({ data }: MarketCardProps) {
         <div className="text-right space-y-1">
           <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-[11px]">
             <span className="text-slate-600 text-right">HIGH</span>
-            <span className="font-mono text-emerald-400">₹{hi.toLocaleString('en-IN')}</span>
+            <span className="font-mono" style={{ color: 'var(--bullish)' }}>₹{hi.toLocaleString('en-IN')}</span>
             <span className="text-slate-600 text-right">LOW</span>
-            <span className="font-mono text-red-400">₹{lo.toLocaleString('en-IN')}</span>
+            <span className="font-mono" style={{ color: 'var(--bearish)' }}>₹{lo.toLocaleString('en-IN')}</span>
             <span className="text-slate-600 text-right">PTS</span>
-            <span className="font-mono text-slate-300">{data.history.length}</span>
+            <span className="font-mono" style={{ color: 'var(--text-primary)' }}>{data.history.length}</span>
           </div>
         </div>
       </div>
@@ -83,23 +83,23 @@ export function MarketCard({ data }: MarketCardProps) {
           <AreaChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
             <defs>
               <linearGradient id="bullishGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#00d09c" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#00d09c" stopOpacity={0}    />
+                <stop offset="5%"  stopColor="var(--bullish)" stopOpacity={0.25} />
+                <stop offset="95%" stopColor="var(--bullish)" stopOpacity={0}    />
               </linearGradient>
               <linearGradient id="bearishGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#ff5252" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#ff5252" stopOpacity={0}    />
+                <stop offset="5%"  stopColor="var(--bearish)" stopOpacity={0.25} />
+                <stop offset="95%" stopColor="var(--bearish)" stopOpacity={0}    />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="2 4" stroke="rgba(255,255,255,0.04)" />
+            <CartesianGrid strokeDasharray="2 4" stroke="var(--border)" />
             <XAxis
               dataKey="date"
-              tick={{ fill: '#475569', fontSize: 10 }}
+              tick={{ fill: 'var(--text-secondary)', fontSize: 10 }}
               axisLine={false} tickLine={false}
             />
             <YAxis
               domain={['auto', 'auto']}
-              tick={{ fill: '#475569', fontSize: 10 }}
+              tick={{ fill: 'var(--text-secondary)', fontSize: 10 }}
               axisLine={false} tickLine={false}
               width={62}
               tickFormatter={v => `₹${v.toLocaleString('en-IN')}`}
@@ -112,7 +112,7 @@ export function MarketCard({ data }: MarketCardProps) {
               strokeWidth={2}
               fill={`url(#${gradientId})`}
               dot={{ fill: trendColor, r: 3, strokeWidth: 0 }}
-              activeDot={{ r: 5, fill: trendColor, stroke: '#0a0e17', strokeWidth: 2 }}
+              activeDot={{ r: 5, fill: trendColor, stroke: 'var(--bg-card)', strokeWidth: 2 }}
             />
           </AreaChart>
         </ResponsiveContainer>
@@ -136,7 +136,7 @@ export function MarketCard({ data }: MarketCardProps) {
         </div>
       </div>
 
-      <div className="text-[10px] text-slate-600 font-mono">
+      <div className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
         src: {data.source} · {new Date(data.observed_at).toLocaleString('en-IN')}
       </div>
     </div>

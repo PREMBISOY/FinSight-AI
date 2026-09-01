@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Activity, Sun, Moon } from 'lucide-react'
+import { Activity, Sun, Moon, LogOut, UserRound } from 'lucide-react'
 import { useTheme } from '../../hooks/useTheme'
+import type { PublicAccount } from '../../types/auth'
 
 function LiveClock() {
   const [time, setTime] = useState(new Date())
@@ -35,7 +36,12 @@ function BackendStatus() {
   )
 }
 
-export function Header() {
+interface HeaderProps {
+  account: PublicAccount
+  onSignOut: () => void
+}
+
+export function Header({ account, onSignOut }: HeaderProps) {
   const { isDark, toggle } = useTheme()
 
   return (
@@ -70,9 +76,17 @@ export function Header() {
         </div>
 
         {/* Right — status + clock + toggle */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <BackendStatus />
-          <LiveClock />
+          <span className="hidden lg:inline"><LiveClock /></span>
+
+          <div className="hidden sm:flex items-center gap-2 pl-3 border-l" style={{ borderColor: 'var(--border)' }}>
+            <div className="w-7 h-7 rounded-full bg-brand-500/10 flex items-center justify-center"><UserRound className="w-3.5 h-3.5 text-brand-500" /></div>
+            <div className="leading-tight max-w-[120px]">
+              <div className="text-[11px] font-semibold truncate">{account.name}</div>
+              <div className="text-[9px] text-slate-500 capitalize">{account.demoUserId.replace('-demo', '')}</div>
+            </div>
+          </div>
 
           {/* Theme toggle */}
           <button
@@ -85,6 +99,10 @@ export function Header() {
               ? <Sun  className="w-4 h-4 text-amber-400" />
               : <Moon className="w-4 h-4 text-blue-500" />
             }
+          </button>
+
+          <button onClick={onSignOut} className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:text-red-500" style={{ backgroundColor: 'var(--bg-muted)', border: '1px solid var(--border)' }} title="Sign out">
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
       </div>

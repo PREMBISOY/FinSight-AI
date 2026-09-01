@@ -28,7 +28,7 @@ function RiskMeter({ level, score }: { level: string; score: number }) {
             key={seg}
             className="flex-1 h-1.5 rounded-sm transition-all duration-500"
             style={{
-              background: seg <= cfg.segments ? cfg.color : '#1a2535',
+              background: seg <= cfg.segments ? cfg.color : 'var(--border)',
               opacity: seg <= cfg.segments ? 1 : 0.3,
             }}
           />
@@ -54,7 +54,7 @@ function ExposureDonut({ exposure, maxSize }: { exposure: number; maxSize: numbe
       <div className="relative" style={{ width: 72, height: 72 }}>
         <svg width={72} height={72} style={{ transform: 'rotate(-90deg)' }}>
           {/* max-position marker */}
-          <circle cx={36} cy={36} r={r} fill="none" stroke="#253349" strokeWidth={7} strokeDasharray={`2 ${circum - 2}`} strokeDashoffset={maxOff} />
+          <circle cx={36} cy={36} r={r} fill="none" stroke="var(--border)" strokeWidth={7} strokeDasharray={`2 ${circum - 2}`} strokeDashoffset={maxOff} />
           {/* fill */}
           <circle cx={36} cy={36} r={r} fill="none" stroke={color} strokeWidth={7} strokeDasharray={circum} strokeDashoffset={offset} strokeLinecap="round"
                   style={{ transition: 'stroke-dashoffset 0.8s ease-out' }} />
@@ -84,7 +84,7 @@ export function IntelligenceCard({ intelligence, profile }: IntelligenceCardProp
       <div className="flex flex-col items-center py-3 gap-3">
         <RecommendationBadge value={intelligence.recommendation} />
         <p className="text-xs text-slate-500 text-center px-2">
-          Tailored for <strong className="text-slate-300">{profile.display_name}</strong> ·{' '}
+          Tailored for <strong className="text-slate-800 dark:text-slate-300">{profile.display_name}</strong> ·{' '}
           {profile.risk_tolerance} risk · {profile.investment_horizon} horizon
         </p>
       </div>
@@ -116,7 +116,7 @@ export function IntelligenceCard({ intelligence, profile }: IntelligenceCardProp
           <h4 className="section-label mb-2">Rationale</h4>
           <ul className="space-y-1.5">
             {intelligence.reasons.map((r, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs text-slate-400 leading-relaxed">
+              <li key={i} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                 <span className="text-brand-400 flex-shrink-0 mt-0.5">›</span>
                 {r}
               </li>
