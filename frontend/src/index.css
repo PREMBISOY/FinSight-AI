@@ -8,17 +8,14 @@
   }
 
   html {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background: #07111f;
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #ffffff;
   }
 
   body {
-    background-color: #07111f;
-    color: #f1f5f9;
+    background-color: #ffffff;
+    color: #424242;
     min-width: 320px;
-    background-image:
-      radial-gradient(circle at 82% -12%, rgba(31, 169, 157, 0.16), transparent 27rem),
-      radial-gradient(circle at -8% 20%, rgba(65, 120, 161, 0.13), transparent 30rem);
   }
 
   /* Scrollbar styling */
@@ -27,31 +24,43 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #0f0f1a;
+    background: #f7f7f7;
   }
   ::-webkit-scrollbar-thumb {
-    background: #252540;
+    background: #c9c9c9;
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #4f46e5;
+    background: #387ed1;
   }
 }
 
 @layer components {
   .card {
-    @apply bg-surface-700/90 border border-white/10 rounded-xl shadow-[0_18px_50px_rgba(0,0,0,0.12)];
+    @apply bg-white border border-[#e7e7e7] rounded shadow-none;
   }
 
   .section-label {
-    @apply text-[11px] font-bold text-slate-500 uppercase tracking-[0.14em];
+    @apply text-[11px] font-medium text-slate-500 uppercase tracking-[0.08em];
   }
 
   .eyebrow {
-    @apply text-[10px] font-bold uppercase tracking-[0.18em] text-brand-400;
+    @apply text-[11px] font-medium uppercase tracking-[0.08em] text-brand-500;
   }
 
   .panel-heading {
-    @apply text-sm font-semibold tracking-tight text-white;
+    @apply text-base font-medium tracking-normal text-slate-800;
   }
+
+  .finsight-light .text-white { color: #424242; }
+  .finsight-light .text-slate-200,
+  .finsight-light .text-slate-300 { color: #424242; }
+  .finsight-light .text-slate-400 { color: #666666; }
+  .finsight-light .text-slate-500 { color: #777777; }
+  .finsight-light .text-slate-600 { color: #909090; }
+  .finsight-light [class*="border-white"] { border-color: #e8e8e8; }
+  .finsight-light .bg-surface-800\/50,
+  .finsight-light .bg-surface-800\/45 { background-color: #ffffff; }
+  .finsight-light .hover\:bg-surface-600\/30:hover { background-color: #fafafa; }
+  .finsight-light .hover\:bg-white\/2:hover { background-color: #fafafa; }
 }

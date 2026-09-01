@@ -60,10 +60,10 @@ export function SynthesisCard({ synthesis }: SynthesisCardProps) {
         <div className="h-24">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
-              <XAxis dataKey="agent" tick={{ fill: '#475569', fontSize: 10 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#475569', fontSize: 10 }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="agent" tick={{ fill: '#777777', fontSize: 10 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: '#777777', fontSize: 10 }} axisLine={false} tickLine={false} />
               <Tooltip
-                contentStyle={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '11px' }}
+                contentStyle={{ background: '#ffffff', border: '1px solid #e7e7e7', borderRadius: '4px', fontSize: '11px' }}
                 formatter={(v: number) => [`${v > 0 ? '+' : ''}${v.toFixed(1)}`, 'Weighted Score']}
               />
               <Bar dataKey="score" radius={[4, 4, 0, 0]}>

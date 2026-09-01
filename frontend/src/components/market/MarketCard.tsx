@@ -51,24 +51,24 @@ export function MarketCard({ data }: MarketCardProps) {
       <div className="h-40">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#252540" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#eeeeee" />
             <XAxis
               dataKey="date"
-              tick={{ fill: '#475569', fontSize: 10 }}
+              tick={{ fill: '#777777', fontSize: 10 }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
               domain={['auto', 'auto']}
-              tick={{ fill: '#475569', fontSize: 10 }}
+              tick={{ fill: '#777777', fontSize: 10 }}
               axisLine={false}
               tickLine={false}
               width={60}
               tickFormatter={v => `₹${v.toLocaleString('en-IN')}`}
             />
             <Tooltip
-              contentStyle={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '12px' }}
-              labelStyle={{ color: '#94a3b8' }}
+              contentStyle={{ background: '#ffffff', border: '1px solid #e7e7e7', borderRadius: '4px', fontSize: '12px' }}
+              labelStyle={{ color: '#666666' }}
               itemStyle={{ color: '#22c55e' }}
               formatter={(value: number) => [`₹${value.toLocaleString('en-IN')}`, 'Close']}
             />
